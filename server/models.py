@@ -19,7 +19,7 @@ metadata = MetaData(
     }
 )
 
-db = SQLAlchemy(app)
+
 
 # Establish User class
 class User(db.Model, SerializerMixin):
