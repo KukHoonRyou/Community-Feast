@@ -25,19 +25,7 @@ def get_users():
         users = User.query.all()
         user_data = []
         for user in users:
-            user_dict = {
-                'id': user.id,
-                'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email_address': user.email_address,
-                'phone_number': user.phone_number,
-                'address': user.address,
-                'allergic_info': user.allergic_info,
-                'created_at': user.created_at,
-                'updated_at': user.updated_at
-            }
-            user_data.append(user_dict)
+            user_data.append(user.to_dict())
         return jsonify(user_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -46,19 +34,7 @@ def get_users():
 def get_user(id):
     try:
         user = User.query.get_or_404(id)
-        user_dict = {
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email_address': user.email_address,
-            'phone_number': user.phone_number,
-            'address': user.address,
-            'allergic_info': user.allergic_info,
-            'created_at': user.created_at,
-            'updated_at': user.updated_at
-        }
-        return jsonify(user_dict), 200
+        return jsonify(user.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -66,7 +42,8 @@ def get_user(id):
 def create_user():
     try:
         data = request.get_json()
-        user = User.from_dict(data)
+        user = User()
+        user.from_dict(data)
         db.session.add(user)
         db.session.commit()
         return jsonify(user.to_dict()), 201
@@ -103,22 +80,7 @@ def get_eats():
         eats = Eats.query.all()
         eats_data = []
         for eat in eats:
-            eat_dict = {
-                'id': eat.id,
-                'eats_name': eat.eats_name,
-                'category': eat.category,
-                'description': eat.description,
-                'cook_time': eat.cook_time,
-                'quantity': eat.quantity,
-                'allergic_ingredient': eat.allergic_ingredient,
-                'perishable': eat.perishable,
-                'image_url': eat.image_url,
-                'is_available': eat.is_available,
-                'created_at': eat.created_at,
-                'updated_at': eat.updated_at,
-                'user_id': eat.user_id
-            }
-            eats_data.append(eat_dict)
+            eats_data.append(eat.to_dict())
         return jsonify(eats_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -127,22 +89,7 @@ def get_eats():
 def get_eat(id):
     try:
         eat = Eats.query.get_or_404(id)
-        eat_dict = {
-            'id': eat.id,
-            'eats_name': eat.eats_name,
-            'category': eat.category,
-            'description': eat.description,
-            'cook_time': eat.cook_time,
-            'quantity': eat.quantity,
-            'allergic_ingredient': eat.allergic_ingredient,
-            'perishable': eat.perishable,
-            'image_url': eat.image_url,
-            'is_available': eat.is_available,
-            'created_at': eat.created_at,
-            'updated_at': eat.updated_at,
-            'user_id': eat.user_id
-        }
-        return jsonify(eat_dict), 200
+        return jsonify(eat.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -150,7 +97,8 @@ def get_eat(id):
 def create_eat():
     try:
         data = request.get_json()
-        eat = Eats.from_dict(data)
+        eat = Eats()
+        eat.from_dict(data)
         db.session.add(eat)
         db.session.commit()
         return jsonify(eat.to_dict()), 201
@@ -187,15 +135,7 @@ def get_dibs():
         dibs = Dibs.query.all()
         dibs_data = []
         for dib in dibs:
-            dib_dict = {
-                'id': dib.id,
-                'dib_status': dib.dib_status,
-                'created_at': dib.created_at,
-                'updated_at': dib.updated_at,
-                'user_id': dib.user_id,
-                'eats_id': dib.eats_id
-            }
-            dibs_data.append(dib_dict)
+            dibs_data.append(dib.to_dict())
         return jsonify(dibs_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -204,15 +144,7 @@ def get_dibs():
 def get_dib(id):
     try:
         dib = Dibs.query.get_or_404(id)
-        dib_dict = {
-            'id': dib.id,
-            'dib_status': dib.dib_status,
-            'created_at': dib.created_at,
-            'updated_at': dib.updated_at,
-            'user_id': dib.user_id,
-            'eats_id': dib.eats_id
-        }
-        return jsonify(dib_dict), 200
+        return jsonify(dib.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -220,7 +152,8 @@ def get_dib(id):
 def create_dib():
     try:
         data = request.get_json()
-        dib = Dibs.from_dict(data)
+        dib = Dibs()
+        dib.from_dict(data)
         db.session.add(dib)
         db.session.commit()
         return jsonify(dib.to_dict()), 201
@@ -257,16 +190,7 @@ def get_reviews():
         reviews = Review.query.all()
         reviews_data = []
         for review in reviews:
-            review_dict = {
-                'id': review.id,
-                'rating': review.rating,
-                'comment': review.comment,
-                'created_at': review.created_at,
-                'updated_at': review.updated_at,
-                'user_id': review.user_id,
-                'eats_id': review.eats_id
-            }
-            reviews_data.append(review_dict)
+            reviews_data.append(review.to_dict())
         return jsonify(reviews_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -275,16 +199,7 @@ def get_reviews():
 def get_review(id):
     try:
         review = Review.query.get_or_404(id)
-        review_dict = {
-            'id': review.id,
-            'rating': review.rating,
-            'comment': review.comment,
-            'created_at': review.created_at,
-            'updated_at': review.updated_at,
-            'user_id': review.user_id,
-            'eats_id': review.eats_id
-        }
-        return jsonify(review_dict), 200
+        return jsonify(review.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -292,7 +207,8 @@ def get_review(id):
 def create_review():
     try:
         data = request.get_json()
-        review = Review.from_dict(data)
+        review = Review()
+        review.from_dict(data)
         db.session.add(review)
         db.session.commit()
         return jsonify(review.to_dict()), 201
@@ -329,11 +245,7 @@ def get_foodtags():
         foodtags = FoodTag.query.all()
         foodtags_data = []
         for foodtag in foodtags:
-            foodtag_dict = {
-                'id': foodtag.id,
-                'name': foodtag.name
-            }
-            foodtags_data.append(foodtag_dict)
+            foodtags_data.append(foodtag.to_dict())
         return jsonify(foodtags_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -342,11 +254,7 @@ def get_foodtags():
 def get_foodtag(id):
     try:
         foodtag = FoodTag.query.get_or_404(id)
-        foodtag_dict = {
-            'id': foodtag.id,
-            'name': foodtag.name
-        }
-        return jsonify(foodtag_dict), 200
+        return jsonify(foodtag.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -354,7 +262,8 @@ def get_foodtag(id):
 def create_foodtag():
     try:
         data = request.get_json()
-        foodtag = FoodTag.from_dict(data)
+        foodtag = FoodTag()
+        foodtag.from_dict(data)
         db.session.add(foodtag)
         db.session.commit()
         return jsonify(foodtag.to_dict()), 201

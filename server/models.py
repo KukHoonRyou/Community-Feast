@@ -30,8 +30,8 @@ class User(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
-    Eats = db.relationship('Eats', back_populates='User', lazy=True)
-    Dibs = db.relationship('Dibs', back_populates='User', lazy=True)
+    Eats = db.relationship('Eats', back_populates='User', cascade='all, delete', lazy=True)
+    Dibs = db.relationship('Dibs', back_populates='User', cascade='all, delete', lazy=True)
     given_reviews = db.relationship('Review', back_populates='User', foreign_keys='Review.user_id', lazy=True)
 
     eat_names = association_proxy('Eats', 'eats_name')
@@ -39,6 +39,25 @@ class User(db.Model, SerializerMixin):
     given_review_ratings = association_proxy('given_reviews', 'rating')
 
     serialize_rules = ('-password',)
+
+    def from_dict(self, data):
+        for field in ['username', 'password', 'first_name', 'last_name', 'email_address', 'phone_number', 'address', 'allergic_info']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email_address': self.email_address,
+            'phone_number': self.phone_number,
+            'address': self.address,
+            'allergic_info': self.allergic_info,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
 
     @validates('username')
     def validate_username(self, key, username):
@@ -67,18 +86,40 @@ class Eats(db.Model, SerializerMixin):
     is_available = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     User = db.relationship('User', back_populates='Eats')
-    food_tags = db.relationship('FoodTag', secondary='eats_food_tag', lazy='subquery', back_populates='Eats')
+    food_tags = db.relationship('FoodTag', secondary='eats_food_tag', lazy='subquery', back_populates='Eats', cascade='all, delete')
     Dibs = db.relationship('Dibs', back_populates='Eats', lazy=True)
-    reviews = db.relationship('Review', back_populates='Eats', lazy=True)
+    reviews = db.relationship('Review', back_populates='Eats', cascade='all, delete', lazy=True)
 
     tags = association_proxy('food_tags', 'name')
     dib_statuses = association_proxy('Dibs', 'dib_status')
     review_ratings = association_proxy('reviews', 'rating')
 
     serialize_rules = ()
+
+    def from_dict(self, data):
+        for field in ['eats_name', 'category', 'description', 'cook_time', 'quantity', 'allergic_ingredient', 'perishable', 'image_url', 'is_available', 'user_id']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'eats_name': self.eats_name,
+            'category': self.category,
+            'description': self.description,
+            'cook_time': self.cook_time,
+            'quantity': self.quantity,
+            'allergic_ingredient': self.allergic_ingredient,
+            'perishable': self.perishable,
+            'image_url': self.image_url,
+            'is_available': self.is_available,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'user_id': self.user_id
+        }
 
     @validates('eats_name')
     def validate_eats_name(self, key, eats_name):
@@ -99,16 +140,32 @@ class Dibs(db.Model, SerializerMixin):
     dib_status = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=True)
 
     User = db.relationship('User', back_populates='Dibs')
     Eats = db.relationship('Eats', back_populates='Dibs')
+    reviews = db.relationship('Review', back_populates='Dibs', cascade='all, delete', lazy=True)
 
     user_names = association_proxy('User', 'username')
     eats_names = association_proxy('Eats', 'eats_name')
 
     serialize_rules = ()
+
+    def from_dict(self, data):
+        for field in ['dib_status', 'user_id', 'eats_id']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'dib_status': self.dib_status,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'user_id': self.user_id,
+            'eats_id': self.eats_id
+        }
 
     @validates('dib_status')
     def validate_dib_status(self, key, dib_status):
@@ -120,20 +177,39 @@ class Review(db.Model, SerializerMixin):
     __tablename__ = "reviews"
 
     id = db.Column(db.Integer, primary_key=True)
-    rating = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Integer, nullable=True)
     comment = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=True)
+    dibs_id = db.Column(db.Integer, db.ForeignKey('dibs.id'), nullable=True)
 
     User = db.relationship('User', back_populates='given_reviews')
     Eats = db.relationship('Eats', back_populates='reviews')
+    Dibs = db.relationship('Dibs', back_populates='reviews')
 
     user_names = association_proxy('User', 'username')
     eats_names = association_proxy('Eats', 'eats_name')
 
     serialize_rules = ()
+
+    def from_dict(self, data):
+        for field in ['rating', 'comment', 'user_id', 'eats_id', 'dibs_id']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'rating': self.rating,
+            'comment': self.comment,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'user_id': self.user_id,
+            'eats_id': self.eats_id,
+            'dibs_id': self.dibs_id
+        }
 
     @validates('rating')
     def validate_rating(self, key, rating):
@@ -146,9 +222,20 @@ class FoodTag(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    Eats = db.relationship('Eats', secondary='eats_food_tag', lazy='subquery', back_populates='food_tags')
+    Eats = db.relationship('Eats', secondary='eats_food_tag', lazy='subquery', back_populates='food_tags', cascade='all, delete')
 
     serialize_rules = ()
+
+    def from_dict(self, data):
+        for field in ['name']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }
 
     @validates('name')
     def validate_name(self, key, name):
