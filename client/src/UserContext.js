@@ -1,7 +1,5 @@
-import React from "react";
 import { createContext } from 'react';
 
-// Use the UserContext to store the user's login status
-const UserContext = createContext();
+const UserContext = createContext(null);
 
 export default UserContext;

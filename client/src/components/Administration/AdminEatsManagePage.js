@@ -1,7 +1,7 @@
 import React from 'react'
 
-export default function Admin() {
+export default function AdminEatsManagePage() {
   return (
-    <div>Admin</div>
+    <div>AdminEatsManagePage</div>
   )
 }

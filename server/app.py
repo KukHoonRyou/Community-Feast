@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import db, User, Eats, Dibs, Review, FoodTag
 
@@ -8,18 +11,62 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
+app.secret_key = 'your_secret_key'  # 앱의 시크릿 키 설정
+
+CORS(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'  # 로그인 페이지의 엔드포인트 설정
+
 with app.app_context():
     db.create_all()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def index():
     return '<h1>Project Server</h1>'
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    user = User.query.filter_by(username=username).first()
+    if user and user.check_password(password):
+        login_user(user)
+        return jsonify(message='Login successful'), 200
+    else:
+        return jsonify(error='Invalid username or password'), 401
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return jsonify(error='Username already exists'), 400
+    new_user = User(username=username)
+    new_user.set_password(password)
+    db.session.add(new_user)
+    db.session.commit()
+    login_user(new_user)
+    return jsonify(message='User created successfully'), 201
+
+@app.route('/logout', methods=['POST'])
+@login_required
+def logout():
+    logout_user()
+    return jsonify(message='Logout successful'), 200
+
 @app.route('/users', methods=['GET'])
+@login_required
 def get_users():
     try:
         users = User.query.all()
@@ -31,6 +78,7 @@ def get_users():
         return jsonify(error=str(e)), 500
 
 @app.route('/users/<int:id>', methods=['GET'])
+@login_required
 def get_user(id):
     try:
         user = User.query.get_or_404(id)
@@ -39,6 +87,7 @@ def get_user(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/users', methods=['POST'])
+@login_required
 def create_user():
     try:
         data = request.get_json()
@@ -52,6 +101,7 @@ def create_user():
         return jsonify(error=str(e)), 500
 
 @app.route('/users/<int:id>', methods=['PATCH'])
+@login_required
 def update_user(id):
     try:
         user = User.query.get_or_404(id)
@@ -64,6 +114,7 @@ def update_user(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/users/<int:id>', methods=['DELETE'])
+@login_required
 def delete_user(id):
     try:
         user = User.query.get_or_404(id)
@@ -75,6 +126,7 @@ def delete_user(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/eats', methods=['GET'])
+@login_required
 def get_eats():
     try:
         eats = Eats.query.all()
@@ -86,6 +138,7 @@ def get_eats():
         return jsonify(error=str(e)), 500
 
 @app.route('/eats/<int:id>', methods=['GET'])
+@login_required
 def get_eat(id):
     try:
         eat = Eats.query.get_or_404(id)
@@ -94,6 +147,7 @@ def get_eat(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/eats', methods=['POST'])
+@login_required
 def create_eat():
     try:
         data = request.get_json()
@@ -107,6 +161,7 @@ def create_eat():
         return jsonify(error=str(e)), 500
 
 @app.route('/eats/<int:id>', methods=['PATCH'])
+@login_required
 def update_eat(id):
     try:
         eat = Eats.query.get_or_404(id)
@@ -119,6 +174,7 @@ def update_eat(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/eats/<int:id>', methods=['DELETE'])
+@login_required
 def delete_eat(id):
     try:
         eat = Eats.query.get_or_404(id)
@@ -130,6 +186,7 @@ def delete_eat(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/dibs', methods=['GET'])
+@login_required
 def get_dibs():
     try:
         dibs = Dibs.query.all()
@@ -141,6 +198,7 @@ def get_dibs():
         return jsonify(error=str(e)), 500
 
 @app.route('/dibs/<int:id>', methods=['GET'])
+@login_required
 def get_dib(id):
     try:
         dib = Dibs.query.get_or_404(id)
@@ -149,6 +207,7 @@ def get_dib(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/dibs', methods=['POST'])
+@login_required
 def create_dib():
     try:
         data = request.get_json()
@@ -162,6 +221,7 @@ def create_dib():
         return jsonify(error=str(e)), 500
 
 @app.route('/dibs/<int:id>', methods=['PATCH'])
+@login_required
 def update_dib(id):
     try:
         dib = Dibs.query.get_or_404(id)
@@ -174,6 +234,7 @@ def update_dib(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/dibs/<int:id>', methods=['DELETE'])
+@login_required
 def delete_dib(id):
     try:
         dib = Dibs.query.get_or_404(id)
@@ -185,6 +246,7 @@ def delete_dib(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews', methods=['GET'])
+@login_required
 def get_reviews():
     try:
         reviews = Review.query.all()
@@ -196,6 +258,7 @@ def get_reviews():
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews/<int:id>', methods=['GET'])
+@login_required
 def get_review(id):
     try:
         review = Review.query.get_or_404(id)
@@ -204,6 +267,7 @@ def get_review(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews', methods=['POST'])
+@login_required
 def create_review():
     try:
         data = request.get_json()
@@ -217,6 +281,7 @@ def create_review():
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews/<int:id>', methods=['PATCH'])
+@login_required
 def update_review(id):
     try:
         review = Review.query.get_or_404(id)
@@ -229,6 +294,7 @@ def update_review(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews/<int:id>', methods=['DELETE'])
+@login_required
 def delete_review(id):
     try:
         review = Review.query.get_or_404(id)
@@ -240,6 +306,7 @@ def delete_review(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/foodtags', methods=['GET'])
+@login_required
 def get_foodtags():
     try:
         foodtags = FoodTag.query.all()
@@ -251,6 +318,7 @@ def get_foodtags():
         return jsonify(error=str(e)), 500
 
 @app.route('/foodtags/<int:id>', methods=['GET'])
+@login_required
 def get_foodtag(id):
     try:
         foodtag = FoodTag.query.get_or_404(id)
@@ -259,6 +327,7 @@ def get_foodtag(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/foodtags', methods=['POST'])
+@login_required
 def create_foodtag():
     try:
         data = request.get_json()
@@ -272,6 +341,7 @@ def create_foodtag():
         return jsonify(error=str(e)), 500
 
 @app.route('/foodtags/<int:id>', methods=['PATCH'])
+@login_required
 def update_foodtag(id):
     try:
         foodtag = FoodTag.query.get_or_404(id)
@@ -284,6 +354,7 @@ def update_foodtag(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/foodtags/<int:id>', methods=['DELETE'])
+@login_required
 def delete_foodtag(id):
     try:
         foodtag = FoodTag.query.get_or_404(id)
