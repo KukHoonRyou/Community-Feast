@@ -3,7 +3,6 @@ from sqlalchemy import MetaData
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
-from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 metadata = MetaData(
@@ -20,7 +19,7 @@ class User(db.Model, SerializerMixin):
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     first_name = db.Column(db.String(50), nullable=True)
     last_name = db.Column(db.String(50), nullable=True)
@@ -30,6 +29,7 @@ class User(db.Model, SerializerMixin):
     allergic_info = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    isAdmin = db.Column(db.Boolean, nullable=False, default=False)
 
     Eats = db.relationship('Eats', back_populates='User', cascade='all, delete', lazy=True)
     Dibs = db.relationship('Dibs', back_populates='User', cascade='all, delete', lazy=True)
@@ -48,7 +48,7 @@ class User(db.Model, SerializerMixin):
         return check_password_hash(self.password, password)
 
     def from_dict(self, data):
-        for field in ['username', 'password', 'first_name', 'last_name', 'email_address', 'phone_number', 'address', 'allergic_info']:
+        for field in ['username', 'password', 'first_name', 'last_name', 'email_address', 'phone_number', 'address', 'allergic_info', 'isAdmin']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -62,10 +62,22 @@ class User(db.Model, SerializerMixin):
             'phone_number': self.phone_number,
             'address': self.address,
             'allergic_info': self.allergic_info,
+            'isAdmin': self.isAdmin,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
+    
+    def get_id(self):
+        return str(self.id)
+    
+    @property
+    def is_authenticated(self):
+        return True
 
+    @property
+    def is_active(self):
+        return True
+    
     @validates('username')
     def validate_username(self, key, username):
         if not username:
