@@ -128,6 +128,9 @@ def create_user():
 def update_user(id):
     try:
         user = User.query.get_or_404(id)
+        if user.id != current_user.id:
+            return jsonify(error='Unauthorized access'), 403
+
         data = request.get_json()
         user.from_dict(data)
         db.session.commit()
@@ -169,7 +172,7 @@ def get_eat(id):
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-@app.route('/api/eats', methods=['POST'])
+@app.route('/eats', methods=['POST'])
 @login_required
 def create_eat():
     try:
