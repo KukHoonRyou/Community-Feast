@@ -33,6 +33,19 @@ def load_user(user_id):
 def index():
     return '<h1>Project Server</h1>'
 
+@app.route('/api/current-user', methods=['GET'])
+@login_required
+def get_current_user():
+    user = current_user
+    return jsonify(
+        id=user.id,
+        username=user.username,
+        email_address=user.email_address,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        isAdmin=user.isAdmin
+    ), 200
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -41,7 +54,11 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
         login_user(user)
-        return jsonify(message='Login successful', isAdmin=user.isAdmin), 200
+        return jsonify({
+            'message': 'Login successful',
+            'userId': user.id,  # 사용자 ID 반환
+            'isAdmin': user.isAdmin
+        }), 200
     else:
         return jsonify(error='Invalid username or password'), 401
 
@@ -152,13 +169,23 @@ def get_eat(id):
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-@app.route('/eats', methods=['POST'])
+@app.route('/api/eats', methods=['POST'])
 @login_required
 def create_eat():
     try:
         data = request.get_json()
-        eat = Eats()
-        eat.from_dict(data)
+        user_id = data.get('user_id')  # 수신된 사용자 ID
+        eat = Eats(
+            eats_name=data['eats_name'],
+            category=data['category'],
+            description=data['description'],
+            cook_time=data['cook_time'],
+            quantity=data['quantity'],
+            allergic_ingredient=data.get('allergic_ingredient', ''),
+            perishable=data['perishable'],
+            image_url=data.get('image_url', ''),
+            user_id=user_id  # 사용자 ID 설정
+        )
         db.session.add(eat)
         db.session.commit()
         return jsonify(eat.to_dict()), 201

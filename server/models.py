@@ -105,7 +105,7 @@ class Eats(db.Model, SerializerMixin):
     is_available = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     User = db.relationship('User', back_populates='Eats')
     food_tags = db.relationship('FoodTag', secondary='eats_food_tag', lazy='subquery', back_populates='Eats', cascade='all, delete')
@@ -119,7 +119,7 @@ class Eats(db.Model, SerializerMixin):
     serialize_rules = ()
 
     def from_dict(self, data):
-        for field in ['eats_name', 'category', 'description', 'cook_time', 'quantity', 'allergic_ingredient', 'perishable', 'image_url', 'is_available', 'user_id']:
+        for field in ['eats_name', 'category', 'description', 'cook_time', 'quantity', 'allergic_ingredient', 'perishable', 'image_url', 'user_id']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -148,9 +148,12 @@ class Eats(db.Model, SerializerMixin):
 
     @validates('quantity')
     def validate_quantity(self, key, quantity):
+        if not isinstance(quantity, int):
+            raise ValueError("Quantity must be an integer")
         if quantity < 0:
             raise ValueError("Quantity cannot be negative")
         return quantity
+
 
 class Dibs(db.Model, SerializerMixin):
     __tablename__ = "dibs"
