@@ -1,10 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import UserContext from '../UserContext';
 
-function NavBar() {
-  const { isLogin, isAdmin } = useContext(UserContext);
-
+function NavBar({ isLogin, isAdmin }) {
   return (
     <nav>
       <ul>
@@ -17,17 +14,16 @@ function NavBar() {
         <li>
           <Link to="/eats">Eats</Link>
         </li>
-        {isLogin && (
+        
           <>
             <li>
               <Link to="/mydibs">My Dibs</Link>
             </li>
             <li>
-              <Link to="/user">User</Link>
+              <Link to="/users">User</Link>
             </li>
           </>
-        )}
-        {!isLogin && (
+          
           <>
             <li>
               <Link to="/login">Login</Link>
@@ -36,12 +32,12 @@ function NavBar() {
               <Link to="/signup">Signup</Link>
             </li>
           </>
-        )}
-        {isAdmin && (
+      
+        
           <li>
             <Link to="/admin">Admin</Link>
           </li>
-        )}
+        
       </ul>
     </nav>
   );

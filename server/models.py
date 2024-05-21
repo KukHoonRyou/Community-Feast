@@ -4,6 +4,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 metadata = MetaData(
     naming_convention={
@@ -39,6 +40,12 @@ class User(db.Model, SerializerMixin):
     given_review_ratings = association_proxy('given_reviews', 'rating')
 
     serialize_rules = ('-password',)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
     def from_dict(self, data):
         for field in ['username', 'password', 'first_name', 'last_name', 'email_address', 'phone_number', 'address', 'allergic_info']:

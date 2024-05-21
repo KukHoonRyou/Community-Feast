@@ -1,8 +1,6 @@
 import React from 'react';
 import { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import UserContext from "./UserContext";
-
 import NavBar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -33,40 +31,37 @@ function App() {
 
   return (
     <>
-      <UserContext.Provider
-        value={{ isLogin, setIsLogin, isAdmin, setIsAdmin }}>
-        <Router>
-          <div>
-            <NavBar />
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/eats" element={<EatsPage />} />
-                <Route path="/eats/:id" element={<EatsDetailPage />} />
-                <Route path="/eats/list" element={<EatsListPage />} />
-                <Route path="/eats/create" element={<EatsCreateFormPage />} />
-                <Route path="/mydibs" element={<MyDibsPage />} />
-                <Route path="/mydibs/list" element={<MyDibsListPage />} />
-                <Route path="/mydibs/history" element={<MyDibsHistoryPage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/users/info" element={<UsersInfoManagePage />} />
-                <Route path="/users/eats" element={<UsersEatsManagePage />} />
-                <Route path="/users/dibs" element={<UsersDibsManagePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/login/form" element={<LoginFormPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/signup/form" element={<SignupFormPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/users" element={<AdminUserManagePage />} />
-                <Route path="/admin/eats" element={<AdminEatsManagePage />} />
-                <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
-                <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </div>
-        </Router>
-      </UserContext.Provider>
+      <Router>
+        <div>
+          <NavBar isLogin={isLogin} isAdmin={isAdmin} />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/eats" element={<EatsPage />} />
+            <Route path="/eats/:id" element={<EatsDetailPage />} />
+            <Route path="/eats/list" element={<EatsListPage />} />
+            <Route path="/eats/create" element={<EatsCreateFormPage />} />
+            <Route path="/mydibs" element={<MyDibsPage />} />
+            <Route path="/mydibs/list" element={<MyDibsListPage />} />
+            <Route path="/mydibs/history" element={<MyDibsHistoryPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/info" element={<UsersInfoManagePage />} />
+            <Route path="/users/eats" element={<UsersEatsManagePage />} />
+            <Route path="/users/dibs" element={<UsersDibsManagePage />} />
+            <Route path="/login" element={<LoginPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
+            <Route path="/login/form" element={<LoginFormPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/signup/form" element={<SignupFormPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/users" element={<AdminUserManagePage />} />
+            <Route path="/admin/eats" element={<AdminEatsManagePage />} />
+            <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+      </Router>
     </>
   );
 }
 
-export default App; 
+export default App;
