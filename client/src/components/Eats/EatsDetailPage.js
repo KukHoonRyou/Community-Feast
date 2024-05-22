@@ -32,6 +32,16 @@ const EatsDetailPage = () => {
       <p>Quantity: {eat.quantity}</p>
       <p>Perishable: {eat.perishable ? 'Yes' : 'No'}</p>
       {eat.image_url && <img src={eat.image_url} alt={eat.eats_name} style={styles.image} />}
+      {eat.food_tags && eat.food_tags.length > 0 && (
+        <div>
+          <h3>Food Tags</h3>
+          <ul>
+            {eat.food_tags.map((tag) => (
+              <li key={tag.id}>{tag.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

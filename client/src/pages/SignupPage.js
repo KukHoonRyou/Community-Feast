@@ -2,23 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Password Not Match.');
+      setError('Passwords do not match.');
       return;
     }
     const response = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        isAdmin
+      }),
     });
     if (response.ok) {
       navigate('/login');
@@ -27,7 +37,7 @@ const SignupPage = () => {
       if (errorData.message === 'User Name Already Exist.') {
         navigate('/login');
       } else {
-        setError(errorData.message || 'Fail to Sign Up.');
+        setError(errorData.message || 'Failed to sign up.');
       }
     }
   };
@@ -41,6 +51,26 @@ const SignupPage = () => {
       <h1>Sign Up</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="firstName">First Name:</label>
+          <input
+            type="text"
+            id="firstName"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="lastName">Last Name:</label>
+          <input
+            type="text"
+            id="lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label htmlFor="username">User Name:</label>
           <input
@@ -72,13 +102,22 @@ const SignupPage = () => {
           />
         </div>
         <div>
-          <label htmlFor="confirmPassword">Password Confirm:</label>
+          <label htmlFor="confirmPassword">Confirm Password:</label>
           <input
             type="password"
             id="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+          />
+        </div>
+        <div>
+          <label htmlFor="isAdmin">Create as Admin:</label>
+          <input
+            type="checkbox"
+            id="isAdmin"
+            checked={isAdmin}
+            onChange={(e) => setIsAdmin(e.target.checked)}
           />
         </div>
         <button type="submit">Sign Up</button>

@@ -9,24 +9,22 @@ const LoginPage = ({ setIsLogin, setIsAdmin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // 로그인 로직 구현
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-
     if (response.ok) {
       const data = await response.json();
       setIsLogin(true);
-      // 관리자 여부에 따라 setIsAdmin 호출
       if (data.isAdmin) {
         setIsAdmin(true);
       }
+      localStorage.setItem('userId', data.userId); // 사용자 ID 저장
       navigate('/');
     } else {
       const errorData = await response.json();
-      setError(errorData.error || 'Fail to login.');
+      setError(errorData.error || 'Failed to login.');
     }
   };
 

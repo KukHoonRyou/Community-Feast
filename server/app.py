@@ -4,15 +4,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_required
+import os
 
+# Import models
 from models import db, User, Eats, Dibs, Review, FoodTag
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
-app.secret_key = 'your_secret_key'  # 앱의 시크릿 키 설정
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Secure your secret key
 
 CORS(app)
 
@@ -20,8 +21,9 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # 로그인 페이지의 엔드포인트 설정
+login_manager.login_view = 'login'
 
+# Create database tables
 with app.app_context():
     db.create_all()
 
@@ -56,7 +58,7 @@ def login():
         login_user(user)
         return jsonify({
             'message': 'Login successful',
-            'userId': user.id,  # 사용자 ID 반환
+            'userId': user.id,
             'isAdmin': user.isAdmin
         }), 200
     else:
@@ -68,8 +70,8 @@ def signup():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    first_name = data.get('firstName')  # 'firstName' 키 사용
-    last_name = data.get('lastName')    # 'lastName' 키 사용
+    first_name = data.get('firstName')
+    last_name = data.get('lastName')
     is_admin = data.get('isAdmin', False)
     
     if User.query.filter_by(username=username).first():
@@ -93,9 +95,7 @@ def logout():
 def get_users():
     try:
         users = User.query.all()
-        user_data = []
-        for user in users:
-            user_data.append(user.to_dict())
+        user_data = [user.to_dict() for user in users]
         return jsonify(user_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -156,9 +156,7 @@ def delete_user(id):
 def get_eats():
     try:
         eats = Eats.query.all()
-        eats_data = []
-        for eat in eats:
-            eats_data.append(eat.to_dict())
+        eats_data = [eat.to_dict() for eat in eats]
         return jsonify(eats_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -177,18 +175,12 @@ def get_eat(id):
 def create_eat():
     try:
         data = request.get_json()
-        user_id = data.get('user_id')  # 수신된 사용자 ID
-        eat = Eats(
-            eats_name=data['eats_name'],
-            category=data['category'],
-            description=data['description'],
-            cook_time=data['cook_time'],
-            quantity=data['quantity'],
-            allergic_ingredient=data.get('allergic_ingredient', ''),
-            perishable=data['perishable'],
-            image_url=data.get('image_url', ''),
-            user_id=user_id  # 사용자 ID 설정
-        )
+        user_id = current_user.id
+        eat = Eats()
+        eat.from_dict(data)
+        eat.user_id = user_id
+        if 'food_tags' in data:
+            eat.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tags']]
         db.session.add(eat)
         db.session.commit()
         return jsonify(eat.to_dict()), 201
@@ -203,6 +195,8 @@ def update_eat(id):
         eat = Eats.query.get_or_404(id)
         data = request.get_json()
         eat.from_dict(data)
+        if 'food_tags' in data:
+            eat.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tags']]
         db.session.commit()
         return jsonify(eat.to_dict()), 200
     except Exception as e:
@@ -213,7 +207,7 @@ def update_eat(id):
 @login_required
 def delete_eat(id):
     try:
-        eat = Eats.query.get_or_Oral(id)
+        eat = Eats.query.get_or_404(id)
         db.session.delete(eat)
         db.session.commit()
         return '', 204
@@ -226,9 +220,7 @@ def delete_eat(id):
 def get_dibs():
     try:
         dibs = Dibs.query.all()
-        dibs_data = []
-        for dib in dibs:
-            dibs_data.append(dib.to_dict())
+        dibs_data = [dib.to_dict() for dib in dibs]
         return jsonify(dibs_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -237,7 +229,7 @@ def get_dibs():
 @login_required
 def get_dib(id):
     try:
-        dib = Dibs.query.get_or_Oral(id)
+        dib = Dibs.query.get_or_404(id)
         return jsonify(dib.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -260,7 +252,7 @@ def create_dib():
 @login_required
 def update_dib(id):
     try:
-        dib = Dibs.query.get_or_Oral(id)
+        dib = Dibs.query.get_or_404(id)
         data = request.get_json()
         dib.from_dict(data)
         db.session.commit()
@@ -273,7 +265,7 @@ def update_dib(id):
 @login_required
 def delete_dib(id):
     try:
-        dib = Dibs.query.get_or_Oral(id)
+        dib = Dibs.query.get_or_404(id)
         db.session.delete(dib)
         db.session.commit()
         return '', 204
@@ -286,9 +278,7 @@ def delete_dib(id):
 def get_reviews():
     try:
         reviews = Review.query.all()
-        reviews_data = []
-        for review in reviews:
-            reviews_data.append(review.to_dict())
+        reviews_data = [review.to_dict() for review in reviews]
         return jsonify(reviews_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -297,7 +287,7 @@ def get_reviews():
 @login_required
 def get_review(id):
     try:
-        review = Review.query.get_or_Oral(id)
+        review = Review.query.get_or_404(id)
         return jsonify(review.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -320,7 +310,7 @@ def create_review():
 @login_required
 def update_review(id):
     try:
-        review = Review.query.get_or_Oral(id)
+        review = Review.query.get_or_404(id)
         data = request.get_json()
         review.from_dict(data)
         db.session.commit()
@@ -333,7 +323,7 @@ def update_review(id):
 @login_required
 def delete_review(id):
     try:
-        review = Review.query.get_or_Oral(id)
+        review = Review.query.get_or_404(id)
         db.session.delete(review)
         db.session.commit()
         return '', 204
@@ -346,9 +336,7 @@ def delete_review(id):
 def get_foodtags():
     try:
         foodtags = FoodTag.query.all()
-        foodtags_data = []
-        for foodtag in foodtags:
-            foodtags_data.append(foodtag.to_dict())
+        foodtags_data = [foodtag.to_dict() for foodtag in foodtags]
         return jsonify(foodtags_data), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -357,7 +345,7 @@ def get_foodtags():
 @login_required
 def get_foodtag(id):
     try:
-        foodtag = FoodTag.query.get_or_Oral(id)
+        foodtag = FoodTag.query.get_or_404(id)
         return jsonify(foodtag.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -380,7 +368,7 @@ def create_foodtag():
 @login_required
 def update_foodtag(id):
     try:
-        foodtag = FoodTag.query.get_or_Oral(id)
+        foodtag = FoodTag.query.get_or_404(id)
         data = request.get_json()
         foodtag.from_dict(data)
         db.session.commit()
@@ -393,12 +381,22 @@ def update_foodtag(id):
 @login_required
 def delete_foodtag(id):
     try:
-        foodtag = FoodTag.query.get_or_Oral(id)
+        foodtag = FoodTag.query.get_or_404(id)
         db.session.delete(foodtag)
         db.session.commit()
         return '', 204
     except Exception as e:
         db.session.rollback()
+        return jsonify(error=str(e)), 500
+    
+@app.route('/foodtags/<int:id>/eats', methods=['GET'])
+@login_required
+def get_eats_by_foodtag(id):
+    try:
+        foodtag = FoodTag.query.get_or_404(id)
+        eats = foodtag.Eats
+        return jsonify([eat.to_dict() for eat in eats]), 200
+    except Exception as e:
         return jsonify(error=str(e)), 500
 
 if __name__ == '__main__':

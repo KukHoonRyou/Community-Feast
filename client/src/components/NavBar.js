@@ -1,7 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-function NavBar({ isLogin, isAdmin }) {
+function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // 로그아웃 로직 구현
+    setIsLogin(false);
+    setIsAdmin(false);
+    navigate('/');
+  };
+
+  const handleLinkClick = (path) => {
+    if (!isLogin) {
+      navigate('/login');
+    } else {
+      navigate(path);
+    }
+  };
+
   return (
     <nav>
       <ul>
@@ -12,18 +29,18 @@ function NavBar({ isLogin, isAdmin }) {
           <Link to="/about">About</Link>
         </li>
         <li>
-          <Link to="/eats">Eats</Link>
+          <button onClick={() => handleLinkClick('/eats')}>Eats</button>
         </li>
-        
-          <>
-            <li>
-              <Link to="/mydibs">My Dibs</Link>
-            </li>
-            <li>
-              <Link to="/users">User</Link>
-            </li>
-          </>
-          
+        <li>
+          <button onClick={() => handleLinkClick('/mydibs')}>My Dibs</button>
+        </li>
+        <li>
+          <button onClick={() => handleLinkClick('/users')}>User</button>
+        </li>
+        <li>
+          <button onClick={() => handleLinkClick('/foodtags')}>Food Tags</button>
+        </li>
+        {!isLogin && (
           <>
             <li>
               <Link to="/login">Login</Link>
@@ -32,12 +49,17 @@ function NavBar({ isLogin, isAdmin }) {
               <Link to="/signup">Signup</Link>
             </li>
           </>
-      
-        
+        )}
+        {isLogin && isAdmin && (
           <li>
             <Link to="/admin">Admin</Link>
           </li>
-        
+        )}
+        {isLogin && (
+          <li>
+            <button onClick={handleLogout}>Logout</button>
+          </li>
+        )}
       </ul>
     </nav>
   );

@@ -69,7 +69,7 @@ class User(db.Model, SerializerMixin):
     
     def get_id(self):
         return str(self.id)
-    
+
     @property
     def is_authenticated(self):
         return True
@@ -122,6 +122,8 @@ class Eats(db.Model, SerializerMixin):
         for field in ['eats_name', 'category', 'description', 'cook_time', 'quantity', 'allergic_ingredient', 'perishable', 'image_url', 'user_id']:
             if field in data:
                 setattr(self, field, data[field])
+        if 'food_tags' in data:
+            self.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tags']]
 
     def to_dict(self):
         return {
@@ -137,7 +139,8 @@ class Eats(db.Model, SerializerMixin):
             'is_available': self.is_available,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
-            'user_id': self.user_id
+            'user_id': self.user_id,
+            'food_tags': [tag.to_dict() for tag in self.food_tags]
         }
 
     @validates('eats_name')
@@ -153,7 +156,6 @@ class Eats(db.Model, SerializerMixin):
         if quantity < 0:
             raise ValueError("Quantity cannot be negative")
         return quantity
-
 
 class Dibs(db.Model, SerializerMixin):
     __tablename__ = "dibs"

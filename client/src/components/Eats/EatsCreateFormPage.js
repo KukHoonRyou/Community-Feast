@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const EatsCreateFormPage = () => {
@@ -11,163 +11,134 @@ const EatsCreateFormPage = () => {
     allergic_ingredient: '',
     perishable: false,
     image_url: '',
+    food_tags: [],  // Food tags를 추가합니다.
   });
+  const [foodTags, setFoodTags] = useState([]);  // 사용 가능한 food tags를 저장합니다.
   const navigate = useNavigate();
+  const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
+
+  useEffect(() => {
+    const fetchFoodTags = async () => {
+      try {
+        const response = await fetch('/foodtags');
+        const data = await response.json();
+        setFoodTags(data);
+      } catch (error) {
+        console.error('Error fetching food tags:', error);
+      }
+    };
+
+    fetchFoodTags();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : type === 'number' ? parseInt(value) : value,
+    });
+  };
+
+  const handleFoodTagClick = (tagId) => {
+    setFormData((prevFormData) => {
+      const { food_tags } = prevFormData;
+      if (food_tags.includes(tagId)) {
+        return {
+          ...prevFormData,
+          food_tags: food_tags.filter((id) => id !== tagId),
+        };
+      } else {
+        return {
+          ...prevFormData,
+          food_tags: [...food_tags, tagId],
+        };
+      }
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submitting form data:', formData); // 전송하는 데이터 출력
+
     try {
       const response = await fetch('/eats', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, user_id: userId }), // 사용자 ID를 함께 전송합니다.
       });
-      if (response.ok) {
-        navigate('/eats');
-      } else {
-        const errorData = await response.json();
-        console.error('Failed to create eats:', errorData);
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
+
+      const data = await response.json();
+      navigate(`/eats/${data.id}`);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Failed to create eats:', error);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Create New Eats</h1>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <label>
-          Eats Name:
-          <input
-            type="text"
-            name="eats_name"
-            value={formData.eats_name}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </label>
-        <label>
-          Category:
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </label>
-        <label>
-          Description:
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            style={styles.textarea}
-          />
-        </label>
-        <label>
-          Cook Time:
-          <input
-            type="text"
-            name="cook_time"
-            value={formData.cook_time}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </label>
-        <label>
-          Quantity:
-          <input
-            type="number"
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </label>
-        <label>
-          Allergic Ingredient:
-          <input
-            type="text"
-            name="allergic_ingredient"
-            value={formData.allergic_ingredient}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </label>
-        <label>
-          Perishable:
-          <input
-            type="checkbox"
-            name="perishable"
-            checked={formData.perishable}
-            onChange={handleChange}
-            style={styles.checkbox}
-          />
-        </label>
-        <label>
-          Image URL:
-          <input
-            type="text"
-            name="image_url"
-            value={formData.image_url}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </label>
-        <button type="submit" style={styles.button}>Create</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <label>
+        Eats Name:
+        <input type="text" name="eats_name" value={formData.eats_name} onChange={handleChange} required />
+      </label>
+      <label>
+        Category:
+        <input type="text" name="category" value={formData.category} onChange={handleChange} required />
+      </label>
+      <label>
+        Description:
+        <textarea name="description" value={formData.description} onChange={handleChange} required />
+      </label>
+      <label>
+        Cook Time:
+        <input type="text" name="cook_time" value={formData.cook_time} onChange={handleChange} required />
+      </label>
+      <label>
+        Quantity:
+        <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} required />
+      </label>
+      <label>
+        Allergic Ingredient:
+        <input type="text" name="allergic_ingredient" value={formData.allergic_ingredient} onChange={handleChange} />
+      </label>
+      <label>
+        Perishable:
+        <input type="checkbox" name="perishable" checked={formData.perishable} onChange={handleChange} />
+      </label>
+      <label>
+        Image URL:
+        <input type="text" name="image_url" value={formData.image_url} onChange={handleChange} />
+      </label>
+      <label>
+        Food Tags:
+        <div>
+          {foodTags.map((tag) => (
+            <button
+              type="button"
+              key={tag.id}
+              onClick={() => handleFoodTagClick(tag.id)}
+              style={{
+                backgroundColor: formData.food_tags.includes(tag.id) ? '#d4edda' : '#f8d7da',
+                margin: '2px',
+                padding: '5px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              {tag.name}
+            </button>
+          ))}
+        </div>
+      </label>
+      <button type="submit">Create Eats</button>
+    </form>
   );
-};
-
-const styles = {
-  container: {
-    padding: '16px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    margin: '8px 0',
-    padding: '8px',
-    fontSize: '16px',
-  },
-  textarea: {
-    margin: '8px 0',
-    padding: '8px',
-    fontSize: '16px',
-    height: '100px',
-  },
-  checkbox: {
-    margin: '8px 0',
-  },
-  button: {
-    padding: '10px 20px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
 };
 
 export default EatsCreateFormPage;

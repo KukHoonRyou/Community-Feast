@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 
 const EatsListPage = () => {
   const [eats, setEats] = useState([]);
+  const [myEats, setMyEats] = useState([]);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
 
   useEffect(() => {
     const fetchEats = async () => {
@@ -11,19 +13,41 @@ const EatsListPage = () => {
         const response = await fetch('/eats');
         const data = await response.json();
         setEats(data);
+        // 현재 로그인된 사용자가 만든 Eats를 필터링합니다.
+        const filteredMyEats = data.filter(eat => eat.user_id === parseInt(userId));
+        setMyEats(filteredMyEats);
       } catch (error) {
         console.error('Error fetching eats:', error);
       }
     };
 
     fetchEats();
-  }, []);
+  }, [userId]);
 
   return (
     <div style={styles.container}>
       <Link to="/eats/create" style={styles.button}>
         Create Eats
       </Link>
+
+      <h2>My Eats</h2>
+      {myEats.map(eat => (
+        <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
+          <div
+            style={{
+              ...styles.card,
+              ...(hoveredCard === eat.id && styles.cardHovered),
+            }}
+            onMouseEnter={() => setHoveredCard(eat.id)}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <h2>{eat.eats_name}</h2>
+            <p>{eat.description}</p>
+          </div>
+        </Link>
+      ))}
+
+      <h2>All Eats</h2>
       {eats.map(eat => (
         <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
           <div
