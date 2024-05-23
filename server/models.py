@@ -195,8 +195,8 @@ class Dibs(db.Model, SerializerMixin):
             'updated_at': self.updated_at.isoformat(),
             'user_id': self.user_id,
             'eats_id': self.eats_id,
-            'user_names': list(self.user_names),
-            'eats_names': list(self.eats_names)
+            'user_names': self.user.username if self.user else None,
+            'eats_names': self.eats.eats_name if self.eats else None
         }
 
     @validates('dib_status')

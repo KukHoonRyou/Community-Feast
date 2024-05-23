@@ -1,13 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const MyDibsFormPage = () => {
     const query = new URLSearchParams(useLocation().search);
     const eatId = query.get('eatId');
-    const [dibStatus, setDibStatus] = useState('');
+    const [eatStatus, setEatStatus] = useState('Open');
     const [createdTime, setCreatedTime] = useState(new Date().toISOString().slice(0, 16)); // 현재 시간으로 초기화
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Fetch the is_available status from the server
+        fetch(`/eats/${eatId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                setEatStatus(data.is_available ? 'Open' : 'Closed');
+            })
+            .catch(error => {
+                setError(error.toString());
+            });
+    }, [eatId]);
+
+    const handleStatusToggle = () => {
+        setEatStatus(prevStatus => (prevStatus === 'Open' ? 'Closed' : 'Open'));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -17,7 +38,7 @@ const MyDibsFormPage = () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                dib_status: dibStatus,
+                dib_status: eatStatus === 'Open',
                 created_at: createdTime,
                 eats_id: eatId,
             }),
@@ -28,8 +49,25 @@ const MyDibsFormPage = () => {
                 }
                 return response.json();
             })
-            .then(data => {
-                navigate(`/dibs/${data.id}`); // Redirect to the newly created dibs detail page
+            .then(() => {
+                return fetch(`/eats/${eatId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        is_available: eatStatus === 'Open',
+                    }),
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update availability');
+                }
+                return response.json();
+            })
+            .then(() => {
+                navigate(`/dibs/${eatId}`); // Redirect to the updated eat detail page
             })
             .catch(error => {
                 setError(error.toString());
@@ -42,13 +80,10 @@ const MyDibsFormPage = () => {
             {error && <div style={errorStyle}>Error: {error}</div>}
             <form onSubmit={handleSubmit}>
                 <div style={formGroupStyle}>
-                    <label>Dib Status:</label>
-                    <input
-                        type="text"
-                        value={dibStatus}
-                        onChange={(e) => setDibStatus(e.target.value)}
-                        required
-                    />
+                    <label>Eat Status:</label>
+                    <button type="button" onClick={handleStatusToggle} style={statusButtonStyle}>
+                        {eatStatus}
+                    </button>
                 </div>
                 <div style={formGroupStyle}>
                     <label>Created Time:</label>
@@ -84,6 +119,15 @@ const formGroupStyle = {
 const buttonStyle = {
     padding: '10px 20px',
     backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+};
+
+const statusButtonStyle = {
+    padding: '10px 20px',
+    backgroundColor: '#6c757d',
     color: '#fff',
     border: 'none',
     borderRadius: '4px',

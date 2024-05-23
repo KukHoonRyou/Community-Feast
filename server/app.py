@@ -229,8 +229,13 @@ def get_dibs():
 @login_required
 def get_dib(id):
     try:
-        dib = Dibs.query.get_or_404(id)
-        return jsonify(dib.to_dict()), 200
+        if id == 0:  # id가 0인 경우 현재 사용자의 모든 Dibs 반환
+            dibs = Dibs.query.filter_by(user_id=current_user.id).all()
+            dibs_data = [dib.to_dict() for dib in dibs]
+            return jsonify(dibs_data), 200
+        else:  # 특정 Dibs id에 대해 정보를 반환
+            dib = Dibs.query.get_or_404(id)
+            return jsonify(dib.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -241,6 +246,7 @@ def create_dib():
         data = request.get_json()
         dib = Dibs()
         dib.from_dict(data)
+        dib.user_id = current_user.id  # 현재 로그인한 사용자의 ID 설정
         db.session.add(dib)
         db.session.commit()
         return jsonify(dib.to_dict()), 201

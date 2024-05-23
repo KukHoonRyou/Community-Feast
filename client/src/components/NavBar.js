@@ -32,7 +32,7 @@ function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
           <button onClick={() => handleLinkClick('/eats')}>Eats</button>
         </li>
         <li>
-          <button onClick={() => handleLinkClick('/mydibs')}>My Dibs</button>
+          <button onClick={() => handleLinkClick('/dibs/:id')}>My Dibs</button>
         </li>
         <li>
           <button onClick={() => handleLinkClick('/users')}>User</button>
