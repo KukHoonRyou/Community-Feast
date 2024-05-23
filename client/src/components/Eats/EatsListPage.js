@@ -11,13 +11,25 @@ const EatsListPage = () => {
     const fetchEats = async () => {
       try {
         const response = await fetch('/eats');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
-        setEats(data);
-        // 현재 로그인된 사용자가 만든 Eats를 필터링합니다.
-        const filteredMyEats = data.filter(eat => eat.user_id === parseInt(userId));
-        setMyEats(filteredMyEats);
+        // 데이터가 배열인지 확인합니다.
+        if (Array.isArray(data)) {
+          setEats(data);
+          // 현재 로그인된 사용자가 만든 Eats를 필터링합니다.
+          const filteredMyEats = data.filter(eat => eat.user_id === parseInt(userId));
+          setMyEats(filteredMyEats);
+        } else {
+          // 배열이 아닌 경우 빈 배열을 설정합니다.
+          setEats([]);
+          setMyEats([]);
+        }
       } catch (error) {
         console.error('Error fetching eats:', error);
+        setEats([]);
+        setMyEats([]);
       }
     };
 
@@ -31,38 +43,74 @@ const EatsListPage = () => {
       </Link>
 
       <h2>My Eats</h2>
-      {myEats.map(eat => (
-        <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
-          <div
-            style={{
-              ...styles.card,
-              ...(hoveredCard === eat.id && styles.cardHovered),
-            }}
-            onMouseEnter={() => setHoveredCard(eat.id)}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            <h2>{eat.eats_name}</h2>
-            <p>{eat.description}</p>
-          </div>
-        </Link>
-      ))}
+      {myEats.length > 0 ? (
+        myEats.map(eat => (
+          <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
+            <div
+              style={{
+                ...styles.card,
+                ...(hoveredCard === eat.id && styles.cardHovered),
+              }}
+              onMouseEnter={() => setHoveredCard(eat.id)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
+              <h2>{eat.eats_name}</h2>
+              <p>{eat.description}</p>
+              <button
+                style={{
+                  backgroundColor: eat.is_available ? 'green' : 'red',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'default',
+                  fontWeight: 'bold',
+                }}
+                disabled
+              >
+                {eat.is_available ? 'Open' : 'Closed'}
+              </button>
+            </div>
+          </Link>
+        ))
+      ) : (
+        <p>No eats created by you.</p>
+      )}
 
       <h2>All Eats</h2>
-      {eats.map(eat => (
-        <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
-          <div
-            style={{
-              ...styles.card,
-              ...(hoveredCard === eat.id && styles.cardHovered),
-            }}
-            onMouseEnter={() => setHoveredCard(eat.id)}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            <h2>{eat.eats_name}</h2>
-            <p>{eat.description}</p>
-          </div>
-        </Link>
-      ))}
+      {eats.length > 0 ? (
+        eats.map(eat => (
+          <Link to={`/eats/${eat.id}`} key={eat.id} style={styles.link}>
+            <div
+              style={{
+                ...styles.card,
+                ...(hoveredCard === eat.id && styles.cardHovered),
+              }}
+              onMouseEnter={() => setHoveredCard(eat.id)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
+              <h2>{eat.eats_name}</h2>
+              <p>{eat.description}</p>
+              <button
+                style={{
+                  backgroundColor: eat.is_available ? 'green' : 'red',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'default',
+                  fontWeight: 'bold',
+                }}
+                disabled
+              >
+                {eat.is_available ? 'Open' : 'Closed'}
+              </button>
+            </div>
+          </Link>
+        ))
+      ) : (
+        <p>No eats available.</p>
+      )}
     </div>
   );
 };

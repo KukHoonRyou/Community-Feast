@@ -394,7 +394,7 @@ def delete_foodtag(id):
 def get_eats_by_foodtag(id):
     try:
         foodtag = FoodTag.query.get_or_404(id)
-        eats = foodtag.Eats
+        eats = foodtag.eats
         return jsonify([eat.to_dict() for eat in eats]), 200
     except Exception as e:
         return jsonify(error=str(e)), 500

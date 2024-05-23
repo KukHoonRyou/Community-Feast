@@ -9,7 +9,7 @@ import EatsDetailPage from './components/Eats/EatsDetailPage';
 import EatsListPage from './components/Eats/EatsListPage';
 import EatsCreateFormPage from './components/Eats/EatsCreateFormPage';
 import MyDibsPage from './pages/MyDibsPage';
-import MyDibsListPage from './components/MyDibs/MyDibsListPage';
+import MyDibsFormPage from './components/MyDibs/MyDibsFormPage';
 import MyDibsHistoryPage from './components/MyDibs/MyDibsHistoryPage';
 import UsersPage from './pages/UsersPage';
 import UsersInfoManagePage from './components/Users/UsersInfoManagePage';
@@ -44,9 +44,9 @@ function App() {
             <Route path="/eats/:id" element={<EatsDetailPage />} />
             <Route path="/eats/list" element={<EatsListPage />} />
             <Route path="/eats/create" element={<EatsCreateFormPage />} />
-            <Route path="/mydibs" element={<MyDibsPage />} />
-            <Route path="/mydibs/list" element={<MyDibsListPage />} />
-            <Route path="/mydibs/history" element={<MyDibsHistoryPage />} />
+            <Route path="/dibs/:id" element={<MyDibsPage />} />
+            <Route path="/dibs/create" element={<MyDibsFormPage />} />
+            <Route path="/dibs/history" element={<MyDibsHistoryPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/users/info" element={<UsersInfoManagePage />} />
             <Route path="/users/eats" element={<UsersEatsManagePage />} />

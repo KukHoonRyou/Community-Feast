@@ -11,30 +11,36 @@ const FoodTagsDetailPage = () => {
         // Fetch the food tag details
         fetch(`/foodtags/${id}`)
             .then(response => {
+                console.log('Fetching food tag details', response);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Food tag details:', data);
                 setFoodTag(data);
             })
             .catch(error => {
+                console.error('Error fetching food tag details:', error);
                 setError(error.toString());
             });
 
         // Fetch the eats related to this food tag
         fetch(`/foodtags/${id}/eats`)
             .then(response => {
+                console.log('Fetching eats related to food tag', response);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Eats related to food tag:', data);
                 setEats(data);
             })
             .catch(error => {
+                console.error('Error fetching eats related to food tag:', error);
                 setError(error.toString());
             });
     }, [id]);

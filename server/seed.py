@@ -37,6 +37,7 @@ if __name__ == '__main__':
                 cook_time=fake.time(),
                 quantity=fake.random_int(min=1, max=10),
                 allergic_ingredient=fake.word(),
+                is_available=fake.random.choice([True] * 7 + [False] * 3),
                 perishable=fake.boolean(),
                 image_url=fake.image_url(),
                 user_id=fake.random_int(min=1, max=10)
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         # Generate fake data for Dibs model
         for _ in range(30):
             dib = Dibs(
-                dib_status=fake.word(),
+                dib_status=fake.random.choice([True] * 7 + [False] * 3),
                 user_id=fake.random_int(min=1, max=10),
                 eats_id=fake.random_int(min=1, max=20)
             )

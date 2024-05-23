@@ -19,7 +19,7 @@ class User(db.Model, SerializerMixin):
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     first_name = db.Column(db.String(50), nullable=True)
     last_name = db.Column(db.String(50), nullable=True)
@@ -31,12 +31,12 @@ class User(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     isAdmin = db.Column(db.Boolean, nullable=False, default=False)
 
-    Eats = db.relationship('Eats', back_populates='User', cascade='all, delete', lazy=True)
-    Dibs = db.relationship('Dibs', back_populates='User', cascade='all, delete', lazy=True)
-    given_reviews = db.relationship('Review', back_populates='User', foreign_keys='Review.user_id', lazy=True)
+    eats = db.relationship('Eats', back_populates='user', cascade='all, delete', lazy=True)
+    dibs = db.relationship('Dibs', back_populates='user', cascade='all, delete', lazy=True)
+    given_reviews = db.relationship('Review', back_populates='user', foreign_keys='Review.user_id', lazy=True)
 
-    eat_names = association_proxy('Eats', 'eats_name')
-    dib_statuses = association_proxy('Dibs', 'dib_status')
+    eat_names = association_proxy('eats', 'eats_name')
+    dib_statuses = association_proxy('dibs', 'dib_status')
     given_review_ratings = association_proxy('given_reviews', 'rating')
 
     serialize_rules = ('-password',)
@@ -64,9 +64,12 @@ class User(db.Model, SerializerMixin):
             'allergic_info': self.allergic_info,
             'isAdmin': self.isAdmin,
             'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'updated_at': self.updated_at.isoformat(),
+            'eat_names': list(self.eat_names),
+            'dib_statuses': list(self.dib_statuses),
+            'given_review_ratings': list(self.given_review_ratings)
         }
-    
+
     def get_id(self):
         return str(self.id)
 
@@ -107,13 +110,13 @@ class Eats(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    User = db.relationship('User', back_populates='Eats')
-    food_tags = db.relationship('FoodTag', secondary='eats_food_tag', lazy='subquery', back_populates='Eats', cascade='all, delete')
-    Dibs = db.relationship('Dibs', back_populates='Eats', lazy=True)
-    reviews = db.relationship('Review', back_populates='Eats', cascade='all, delete', lazy=True)
+    user = db.relationship('User', back_populates='eats')
+    food_tags = db.relationship('FoodTag', secondary='eats_food_tag', lazy='subquery', back_populates='eats', cascade='all, delete')
+    dibs = db.relationship('Dibs', back_populates='eats', lazy=True)
+    reviews = db.relationship('Review', back_populates='eats', cascade='all, delete', lazy=True)
 
     tags = association_proxy('food_tags', 'name')
-    dib_statuses = association_proxy('Dibs', 'dib_status')
+    dib_statuses = association_proxy('dibs', 'dib_status')
     review_ratings = association_proxy('reviews', 'rating')
 
     serialize_rules = ()
@@ -136,11 +139,14 @@ class Eats(db.Model, SerializerMixin):
             'allergic_ingredient': self.allergic_ingredient,
             'perishable': self.perishable,
             'image_url': self.image_url,
-            'is_available': self.is_available,
+            'is_available': bool(self.is_available),
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'user_id': self.user_id,
-            'food_tags': [tag.to_dict() for tag in self.food_tags]
+            'food_tags': [tag.to_dict() for tag in self.food_tags],
+            'tags': list(self.tags),
+            'dib_statuses': list(self.dib_statuses),
+            'review_ratings': list(self.review_ratings)
         }
 
     @validates('eats_name')
@@ -161,18 +167,18 @@ class Dibs(db.Model, SerializerMixin):
     __tablename__ = "dibs"
 
     id = db.Column(db.Integer, primary_key=True)
-    dib_status = db.Column(db.String(50), nullable=False)
+    dib_status = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=True)
 
-    User = db.relationship('User', back_populates='Dibs')
-    Eats = db.relationship('Eats', back_populates='Dibs')
-    reviews = db.relationship('Review', back_populates='Dibs', cascade='all, delete', lazy=True)
+    user = db.relationship('User', back_populates='dibs')
+    eats = db.relationship('Eats', back_populates='dibs')
+    reviews = db.relationship('Review', back_populates='dibs', cascade='all, delete', lazy=True)
 
-    user_names = association_proxy('User', 'username')
-    eats_names = association_proxy('Eats', 'eats_name')
+    user_names = association_proxy('user', 'username')
+    eats_names = association_proxy('eats', 'eats_name')
 
     serialize_rules = ()
 
@@ -184,17 +190,19 @@ class Dibs(db.Model, SerializerMixin):
     def to_dict(self):
         return {
             'id': self.id,
-            'dib_status': self.dib_status,
+            'dib_status': bool(self.dib_status),
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'user_id': self.user_id,
-            'eats_id': self.eats_id
+            'eats_id': self.eats_id,
+            'user_names': list(self.user_names),
+            'eats_names': list(self.eats_names)
         }
 
     @validates('dib_status')
     def validate_dib_status(self, key, dib_status):
-        if not dib_status:
-            raise ValueError("Dib status cannot be empty")
+        if dib_status not in [True, False]:
+            raise ValueError("Dib status must be a boolean")
         return dib_status
 
 class Review(db.Model, SerializerMixin):
@@ -209,12 +217,12 @@ class Review(db.Model, SerializerMixin):
     eats_id = db.Column(db.Integer, db.ForeignKey('eats.id'), nullable=True)
     dibs_id = db.Column(db.Integer, db.ForeignKey('dibs.id'), nullable=True)
 
-    User = db.relationship('User', back_populates='given_reviews')
-    Eats = db.relationship('Eats', back_populates='reviews')
-    Dibs = db.relationship('Dibs', back_populates='reviews')
+    user = db.relationship('User', back_populates='given_reviews')
+    eats = db.relationship('Eats', back_populates='reviews')
+    dibs = db.relationship('Dibs', back_populates='reviews')
 
-    user_names = association_proxy('User', 'username')
-    eats_names = association_proxy('Eats', 'eats_name')
+    user_names = association_proxy('user', 'username')
+    eats_names = association_proxy('eats', 'eats_name')
 
     serialize_rules = ()
 
@@ -232,7 +240,9 @@ class Review(db.Model, SerializerMixin):
             'updated_at': self.updated_at.isoformat(),
             'user_id': self.user_id,
             'eats_id': self.eats_id,
-            'dibs_id': self.dibs_id
+            'dibs_id': self.dibs_id,
+            'user_names': list(self.user_names),
+            'eats_names': list(self.eats_names)
         }
 
     @validates('rating')
@@ -246,7 +256,7 @@ class FoodTag(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    Eats = db.relationship('Eats', secondary='eats_food_tag', lazy='subquery', back_populates='food_tags', cascade='all, delete')
+    eats = db.relationship('Eats', secondary='eats_food_tag', lazy='subquery', back_populates='food_tags', cascade='all, delete')
 
     serialize_rules = ()
 
