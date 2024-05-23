@@ -27,6 +27,8 @@ import FoodTagsListPage from './components/FoodTags/FoodTagsListPage';
 import FoodTagsDetailPage from './components/FoodTags/FoodTagsDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+
+
 function App() {
   const [isLogin, setIsLogin] = useState(false); // State to store the login status
   const [isAdmin, setIsAdmin] = useState(false); // State to store the admin status
@@ -71,6 +73,8 @@ function App() {
             <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
             <Route path="/logout" element={handleLogout} />
             <Route path="*" element={<NotFoundPage />} />
+            
+            
           </Routes>
         </div>
       </Router>

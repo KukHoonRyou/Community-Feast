@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const MyDibsPage = () => {
+const MyDibsPage = ({ onDibsFetch }) => {
     const [dibs, setDibs] = useState([]);
     const [error, setError] = useState(null);
 
@@ -14,11 +14,14 @@ const MyDibsPage = () => {
             })
             .then(data => {
                 setDibs(data);
+                if (onDibsFetch) {
+                    onDibsFetch(data);
+                }
             })
             .catch(error => {
                 setError(error.toString());
             });
-    }, []);
+    }, [onDibsFetch]);
 
     if (error) {
         return <div>Error: {error}</div>;

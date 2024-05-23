@@ -14,6 +14,7 @@ const EatsCreateFormPage = () => {
     food_tags: [],  // Food tags를 추가합니다.
   });
   const [foodTags, setFoodTags] = useState([]);  // 사용 가능한 food tags를 저장합니다.
+  const [newFoodTag, setNewFoodTag] = useState(''); // 새로운 Food Tag 입력값을 저장합니다.
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
 
@@ -80,6 +81,32 @@ const EatsCreateFormPage = () => {
     }
   };
 
+  const handleNewFoodTagChange = (e) => {
+    setNewFoodTag(e.target.value);
+  };
+
+  const handleNewFoodTagSubmit = async () => {
+    try {
+      const response = await fetch('/foodtags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newFoodTag }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      setFoodTags([...foodTags, data]);
+      setNewFoodTag(''); // 입력창을 초기화합니다.
+    } catch (error) {
+      console.error('Failed to create food tag:', error);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <label>
@@ -135,6 +162,15 @@ const EatsCreateFormPage = () => {
             </button>
           ))}
         </div>
+      </label>
+      <label>
+        Add New Food Tag:
+        <input
+          type="text"
+          value={newFoodTag}
+          onChange={handleNewFoodTagChange}
+        />
+        <button type="button" onClick={handleNewFoodTagSubmit}>Add</button>
       </label>
       <button type="submit">Create Eats</button>
     </form>

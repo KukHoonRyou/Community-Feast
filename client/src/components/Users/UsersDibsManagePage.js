@@ -82,6 +82,16 @@ const UserDibsManagePage = () => {
       });
 
       if (response.ok) {
+        // Eats의 is_available 상태를 true로 업데이트
+        await fetch(`/eats/${selectedDib.eats_id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ is_available: true }),
+        });
+
         setSuccess('Dib deleted successfully.');
         // Dibs 목록에서 삭제된 Dib를 제거합니다.
         const updatedDibs = dibs.filter(dib => dib.id !== selectedDib.id);
