@@ -84,6 +84,34 @@ const UserEatsManagePage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedEat) return;
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch(`/eats/${selectedEat.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+
+      if (response.ok) {
+        setSuccess('Eat deleted successfully.');
+        // Eats 목록에서 삭제된 Eat를 제거합니다.
+        const updatedEats = eats.filter(eat => eat.id !== selectedEat.id);
+        setEats(updatedEats);
+        setSelectedEat(null); // 선택된 Eat을 초기화합니다.
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to delete eat.');
+      }
+    } catch (error) {
+      setError('Error deleting eat.');
+    }
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h1>Manage Your Eats</h1>
@@ -186,6 +214,7 @@ const UserEatsManagePage = () => {
             />
           </div>
           <button type="submit">Update Eat</button>
+          <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Eat</button>
         </form>
       )}
     </div>
@@ -209,6 +238,16 @@ const styles = {
     borderRadius: '8px',
     width: '300px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4d4d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    marginLeft: '10px',
   }
 };
 

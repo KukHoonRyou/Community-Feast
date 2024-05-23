@@ -6,6 +6,7 @@ const EatsDetailPage = () => {
   const [eat, setEat] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const userId = localStorage.getItem('userId'); // 로컬 스토리지에서 사용자 ID를 가져옵니다.
 
   useEffect(() => {
     fetch(`/eats/${id}`)
@@ -59,12 +60,16 @@ const EatsDetailPage = () => {
       >
         {eat.is_available ? 'Open' : 'Closed'}
       </button>
-      {eat.is_available ? (
-        <button onClick={handleDibsClick} style={buttonStyle}>
-          Dibs
-        </button>
+      {eat.user_id === parseInt(userId) ? (
+        <p style={messageStyle}>Thanks for sharing!</p>
       ) : (
-        <p style={messageStyle}>Sorry, somebody dibs first!</p>
+        eat.is_available ? (
+          <button onClick={handleDibsClick} style={buttonStyle}>
+            Dibs
+          </button>
+        ) : (
+          <p style={messageStyle}>Sorry, somebody dibs first!</p>
+        )
       )}
     </div>
   );

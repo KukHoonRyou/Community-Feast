@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UserInfoManagePage = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const UserInfoManagePage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -67,6 +69,32 @@ const UserInfoManagePage = () => {
       }
     } catch (error) {
       setError('Error updating user information.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("탈퇴하겠습니까?")) {
+      try {
+        const response = await fetch(`/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (response.ok) {
+          alert('나중에 다시 만나요');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('token');
+          navigate('/');
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          setError(data.error || 'Failed to delete account.');
+        }
+      } catch (error) {
+        setError('Error deleting account.');
+      }
     }
   };
 
@@ -149,9 +177,23 @@ const UserInfoManagePage = () => {
           />
         </div>
         <button type="submit">Update Information</button>
+        <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Account</button>
       </form>
     </div>
   );
+};
+
+const styles = {
+  deleteButton: {
+    backgroundColor: '#ff4d4d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    marginLeft: '10px',
+  }
 };
 
 export default UserInfoManagePage;

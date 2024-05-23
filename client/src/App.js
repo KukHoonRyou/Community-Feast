@@ -1,6 +1,5 @@
-import React from 'react';
-import { useState } from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -32,6 +31,14 @@ function App() {
   const [isLogin, setIsLogin] = useState(false); // State to store the login status
   const [isAdmin, setIsAdmin] = useState(false); // State to store the admin status
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('token');
+    setIsLogin(false);
+    setIsAdmin(false);
+    return <Navigate to="/" />;
+  };
+
   return (
     <>
       <Router>
@@ -62,6 +69,7 @@ function App() {
             <Route path="/admin/users" element={<AdminUserManagePage />} />
             <Route path="/admin/eats" element={<AdminEatsManagePage />} />
             <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
+            <Route path="/logout" element={handleLogout} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
