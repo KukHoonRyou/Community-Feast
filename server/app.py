@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from sqlalchemy.orm import joinedload
 
 # Import models
 from models import db, User, Eats, Dibs, Review, FoodTag
@@ -194,9 +195,20 @@ def update_eat(id):
     try:
         eat = Eats.query.get_or_404(id)
         data = request.get_json()
-        eat.from_dict(data)
+
+        # is_available을 포함한 데이터를 개별적으로 처리
+        if 'is_available' in data:
+            eat.is_available = data['is_available']
+
+        # 다른 필드를 업데이트
+        for key, value in data.items():
+            if key != 'food_tags':
+                setattr(eat, key, value)
+
+        # food_tags 필드가 있는 경우 별도로 처리
         if 'food_tags' in data:
             eat.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tags']]
+
         db.session.commit()
         return jsonify(eat.to_dict()), 200
     except Exception as e:
@@ -230,11 +242,11 @@ def get_dibs():
 def get_dib(id):
     try:
         if id == 0:  # id가 0인 경우 현재 사용자의 모든 Dibs 반환
-            dibs = Dibs.query.filter_by(user_id=current_user.id).all()
+            dibs = Dibs.query.options(joinedload(Dibs.eats)).filter_by(user_id=current_user.id).all()
             dibs_data = [dib.to_dict() for dib in dibs]
             return jsonify(dibs_data), 200
         else:  # 특정 Dibs id에 대해 정보를 반환
-            dib = Dibs.query.get_or_404(id)
+            dib = Dibs.query.options(joinedload(Dibs.eats)).get_or_404(id)
             return jsonify(dib.to_dict()), 200
     except Exception as e:
         return jsonify(error=str(e)), 500

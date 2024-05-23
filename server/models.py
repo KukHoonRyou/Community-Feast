@@ -196,7 +196,7 @@ class Dibs(db.Model, SerializerMixin):
             'user_id': self.user_id,
             'eats_id': self.eats_id,
             'user_names': self.user.username if self.user else None,
-            'eats_names': self.eats.eats_name if self.eats else None
+            'eats_name': self.eats.eats_name if self.eats else None  # Eats의 이름 포함
         }
 
     @validates('dib_status')

@@ -35,7 +35,7 @@ const MyDibsPage = () => {
                 <div key={dib.id} style={dibItemStyle}>
                     <p>Status: {dib.dib_status ? 'Open' : 'Closed'}</p>
                     <p>Created At: {new Date(dib.created_at).toLocaleString()}</p>
-                    <p>Eat ID: {dib.eats_id}</p>
+                    <p>Eat Name: {dib.eats_name}</p> {/* Eats의 이름 출력 */}
                     <p>User ID: {dib.user_id}</p>
                 </div>
             ))}

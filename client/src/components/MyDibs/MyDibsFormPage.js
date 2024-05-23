@@ -27,11 +27,41 @@ const MyDibsFormPage = () => {
     }, [eatId]);
 
     const handleStatusToggle = () => {
-        setEatStatus(prevStatus => (prevStatus === 'Open' ? 'Closed' : 'Open'));
+        const newStatus = eatStatus === 'Open' ? 'Closed' : 'Open';
+        setEatStatus(newStatus);
+
+        console.log(`Updating is_available to: ${newStatus === 'Open'}`); // 디버그용 콘솔 로그
+
+        fetch(`/eats/${eatId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                is_available: newStatus === 'Open',
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Network response was not ok');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Eat status updated:', data);
+        })
+        .catch(error => {
+            console.error('Error updating eat status:', error); // 오류를 콘솔에 출력
+            setError(error.toString());
+        });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError('');
+
         fetch('/dibs', {
             method: 'POST',
             headers: {
@@ -43,35 +73,40 @@ const MyDibsFormPage = () => {
                 eats_id: eatId,
             }),
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(() => {
-                return fetch(`/eats/${eatId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        is_available: eatStatus === 'Open',
-                    }),
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Network response was not ok');
                 });
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update availability');
-                }
-                return response.json();
-            })
-            .then(() => {
-                navigate(`/dibs/${eatId}`); // Redirect to the updated eat detail page
-            })
-            .catch(error => {
-                setError(error.toString());
+            }
+            return response.json();
+        })
+        .then(() => {
+            return fetch(`/eats/${eatId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    is_available: eatStatus === 'Open',
+                }),
             });
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Failed to update availability');
+                });
+            }
+            return response.json();
+        })
+        .then(() => {
+            navigate(`/dibs/${eatId}`); // Redirect to the updated eat detail page
+        })
+        .catch(error => {
+            console.error('Error creating dib or updating eat status:', error); // 오류를 콘솔에 출력
+            setError(error.toString());
+        });
     };
 
     return (

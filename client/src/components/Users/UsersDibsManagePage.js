@@ -69,12 +69,12 @@ const UserDibsManagePage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     setError('');
     setSuccess('');
 
     try {
-      const response = await fetch(`/dibs/${id}`, {
+      const response = await fetch(`/dibs/${selectedDib.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -84,7 +84,7 @@ const UserDibsManagePage = () => {
       if (response.ok) {
         setSuccess('Dib deleted successfully.');
         // Dibs 목록에서 삭제된 Dib를 제거합니다.
-        const updatedDibs = dibs.filter(dib => dib.id !== id);
+        const updatedDibs = dibs.filter(dib => dib.id !== selectedDib.id);
         setDibs(updatedDibs);
         setSelectedDib(null);
       } else {
@@ -106,8 +106,8 @@ const UserDibsManagePage = () => {
       {dibs.map(dib => (
         <div key={dib.id} style={styles.dibItem} onClick={() => handleSelectDib(dib)}>
           <h3>{dib.eats_name}</h3> {/* Eats의 이름 출력 */}
+          <p>{dib.created_at}</p>
           <p>{dib.dib_status ? 'Open' : 'Closed'}</p>
-          <button onClick={() => handleDelete(dib.id)} style={styles.deleteButton}>Delete</button>
         </div>
       ))}
 
@@ -124,7 +124,8 @@ const UserDibsManagePage = () => {
               onChange={handleChange}
             />
           </div>
-          <button type="submit">Update Dib</button>
+          <button type="submit" style={styles.updateButton}>Update Dib</button>
+          <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Dib</button> {/* 삭제 버튼 추가 */}
         </form>
       )}
     </div>
@@ -148,6 +149,16 @@ const styles = {
     borderRadius: '8px',
     width: '300px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  updateButton: {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    marginRight: '10px',
   },
   deleteButton: {
     backgroundColor: '#ff4d4d',
