@@ -1,11 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
   const navigate = useNavigate();
+  const [averageRating, setAverageRating] = useState(0);
+
+  useEffect(() => {
+    if (isLogin) {
+      calculateAverageRating();
+    }
+  }, [isLogin]);
+
+  const calculateAverageRating = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const response = await fetch(`/reviews?user_id=${userId}`);
+      if (response.ok) {
+        const reviews = await response.json();
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          const average = totalRating / reviews.length;
+          setAverageRating(average.toFixed(2));
+        }
+      }
+    } catch (error) {
+      console.error('Error calculating average rating:', error);
+    }
+  };
 
   const handleLogout = () => {
-    // 로그아웃 로직 구현
+    localStorage.removeItem('userId');
+    localStorage.removeItem('token');
     setIsLogin(false);
     setIsAdmin(false);
     navigate('/');
@@ -40,6 +65,11 @@ function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
         <li>
           <button onClick={() => handleLinkClick('/foodtags')}>Food Tags</button>
         </li>
+        {isLogin && (
+          <li>
+            <span>User Rating: {averageRating}</span>
+          </li>
+        )}
         {!isLogin && (
           <>
             <li>

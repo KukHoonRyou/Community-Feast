@@ -129,7 +129,7 @@ def create_user():
 def update_user(id):
     try:
         user = User.query.get_or_404(id)
-        if user.id != current_user.id:
+        if user.id != current_user.id and not current_user.isAdmin:
             return jsonify(error='Unauthorized access'), 403
 
         data = request.get_json()
@@ -202,7 +202,7 @@ def update_eat(id):
 
         # 다른 필드를 업데이트
         for key, value in data.items():
-            if key != 'food_tags':
+            if key != 'is_available' and key != 'food_tags':
                 setattr(eat, key, value)
 
         # food_tags 필드가 있는 경우 별도로 처리
@@ -242,14 +242,17 @@ def get_dibs():
 def get_dib(id):
     try:
         if id == 0:  # id가 0인 경우 현재 사용자의 모든 Dibs 반환
-            dibs = Dibs.query.options(joinedload(Dibs.eats)).filter_by(user_id=current_user.id).all()
+            dibs = Dibs.query.options(joinedload(Dibs.eats).joinedload(Eats.user)).filter_by(user_id=current_user.id).all()
             dibs_data = [dib.to_dict() for dib in dibs]
             return jsonify(dibs_data), 200
         else:  # 특정 Dibs id에 대해 정보를 반환
-            dib = Dibs.query.options(joinedload(Dibs.eats)).get_or_404(id)
-            return jsonify(dib.to_dict()), 200
+            dib = Dibs.query.options(joinedload(Dibs.eats).joinedload(Eats.user)).get_or_404(id)
+            dib_data = dib.to_dict()
+            return jsonify(dib_data), 200
     except Exception as e:
+        app.logger.error(f"Error fetching dib: {e}")
         return jsonify(error=str(e)), 500
+
 
 @app.route('/dibs', methods=['POST'])
 @login_required
@@ -291,16 +294,21 @@ def delete_dib(id):
         db.session.rollback()
         return jsonify(error=str(e)), 500
 
-@app.route('/reviews', methods=['GET'])
-@login_required
-def get_reviews():
-    try:
-        reviews = Review.query.all()
-        reviews_data = [review.to_dict() for review in reviews]
-        return jsonify(reviews_data), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 500
 
+@app.route('/reviews', methods=['GET'])
+def get_reviews():
+    dibs_id = request.args.get('dibs_id')
+    user_id = request.args.get('user_id')
+    
+    if dibs_id:
+        reviews = Review.query.filter_by(dibs_id=dibs_id).all()
+    elif user_id:
+        reviews = Review.query.filter_by(user_id=user_id).all()
+    else:
+        reviews = []
+    
+    return jsonify([review.to_dict() for review in reviews])
+    
 @app.route('/reviews/<int:id>', methods=['GET'])
 @login_required
 def get_review(id):
@@ -311,43 +319,40 @@ def get_review(id):
         return jsonify(error=str(e)), 500
 
 @app.route('/reviews', methods=['POST'])
-@login_required
 def create_review():
-    try:
-        data = request.get_json()
-        review = Review()
-        review.from_dict(data)
-        db.session.add(review)
-        db.session.commit()
-        return jsonify(review.to_dict()), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error=str(e)), 500
+    data = request.get_json()
+    new_review = Review(
+        rating=data['rating'],
+        comment=data['comment'],
+        dibs_id=data['dibs_id'],
+        user_id=data['user_id'],
+        eats_id=data['eats_id']
+    )
+    db.session.add(new_review)
+    db.session.commit()
+    return jsonify(new_review.to_dict()), 201
 
-@app.route('/reviews/<int:id>', methods=['PATCH'])
-@login_required
-def update_review(id):
-    try:
-        review = Review.query.get_or_404(id)
+@app.route('/reviews/<int:review_id>', methods=['PATCH'])
+def update_review(review_id):
+    review = Review.query.get(review_id)
+    if review:
         data = request.get_json()
-        review.from_dict(data)
+        review.rating = data.get('rating', review.rating)
+        review.comment = data.get('comment', review.comment)
         db.session.commit()
-        return jsonify(review.to_dict()), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error=str(e)), 500
+        return jsonify(review.to_dict())
+    else:
+        return jsonify({'error': 'Review not found'}), 404
 
-@app.route('/reviews/<int:id>', methods=['DELETE'])
-@login_required
-def delete_review(id):
-    try:
-        review = Review.query.get_or_404(id)
+@app.route('/reviews/<int:review_id>', methods=['DELETE'])
+def delete_review(review_id):
+    review = Review.query.get(review_id)
+    if review:
         db.session.delete(review)
         db.session.commit()
         return '', 204
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error=str(e)), 500
+    else:
+        return jsonify({'error': 'Review not found'}), 404
 
 @app.route('/foodtags', methods=['GET'])
 @login_required

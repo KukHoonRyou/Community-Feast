@@ -73,7 +73,7 @@ const UserInfoManagePage = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("탈퇴하겠습니까?")) {
+    if (window.confirm("Are you sure you want to delete your account?")) {
       try {
         const response = await fetch(`/users/${userId}`, {
           method: 'DELETE',
@@ -83,7 +83,7 @@ const UserInfoManagePage = () => {
         });
 
         if (response.ok) {
-          alert('나중에 다시 만나요');
+          alert('I look forward to meeting you again when the time is right.');
           localStorage.removeItem('userId');
           localStorage.removeItem('token');
           navigate('/');

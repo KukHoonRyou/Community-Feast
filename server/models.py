@@ -15,6 +15,12 @@ metadata = MetaData(
 
 db = SQLAlchemy(metadata=metadata)
 
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import validates
+
+db = SQLAlchemy()
+
 class User(db.Model, SerializerMixin):
     __tablename__ = "user"
 
@@ -52,6 +58,13 @@ class User(db.Model, SerializerMixin):
             if field in data:
                 setattr(self, field, data[field])
 
+    @property
+    def average_rating(self):
+        reviews = [review.rating for review in self.given_reviews if review.rating is not None]
+        if reviews:
+            return sum(reviews) / len(reviews)
+        return None
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -67,7 +80,8 @@ class User(db.Model, SerializerMixin):
             'updated_at': self.updated_at.isoformat(),
             'eat_names': list(self.eat_names),
             'dib_statuses': list(self.dib_statuses),
-            'given_review_ratings': list(self.given_review_ratings)
+            'given_review_ratings': list(self.given_review_ratings),
+            'average_rating': self.average_rating
         }
 
     def get_id(self):
@@ -196,7 +210,9 @@ class Dibs(db.Model, SerializerMixin):
             'user_id': self.user_id,
             'eats_id': self.eats_id,
             'user_names': self.user.username if self.user else None,
-            'eats_name': self.eats.eats_name if self.eats else None  # Eats의 이름 포함
+            'eats_name': self.eats.eats_name if self.eats else None,
+            'eats_user_phone': self.eats.user.phone_number if self.eats and self.eats.user else None,
+            'eats_user_address': self.eats.user.address if self.eats and self.eats.user else None
         }
 
     @validates('dib_status')
@@ -241,8 +257,8 @@ class Review(db.Model, SerializerMixin):
             'user_id': self.user_id,
             'eats_id': self.eats_id,
             'dibs_id': self.dibs_id,
-            'user_names': list(self.user_names),
-            'eats_names': list(self.eats_names)
+            'user_names': self.user.username if self.user else None,
+            'eats_names': self.eats.eats_name if self.eats else None
         }
 
     @validates('rating')
