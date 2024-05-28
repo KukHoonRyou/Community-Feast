@@ -58,7 +58,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <NavBar isLogin={isLogin} isAdmin={isAdmin} setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />
-        <div style={{ flex: 1, marginTop: '64px' }}> {/* 네비게이션 바 높이만큼 마진 추가 */}
+        <div style={{ flex: 1, marginTop: '64px' }}> 
           <Routes>
             <Route path="/" element={<HomePage isLogin={isLogin} />} />
             <Route path="/about" element={<AboutPage />} />
