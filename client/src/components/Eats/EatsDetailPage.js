@@ -34,6 +34,24 @@ const EatsDetailPage = () => {
             });
     }, [id]);
 
+    useEffect(() => {
+        if (eat && eat.id) {
+            fetch(`/dibs?eatId=${eat.id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    setDibs(data);
+                })
+                .catch(error => {
+                    setError(error.toString());
+                });
+        }
+    }, [eat]);
+
     const handleDibsClick = () => {
         navigate(`/dibs/create?eatId=${id}`);
     };
@@ -57,9 +75,25 @@ const EatsDetailPage = () => {
             <CssBaseline />
             <Container>
                 <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-                    <Typography variant="h4" component="h2" gutterBottom>
-                        {eat.eats_name}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="h4" component="h2" gutterBottom>
+                            {eat.eats_name}
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                backgroundColor: eat.is_available ? '#007bff' : '#6c757d',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                ':hover': {
+                                    backgroundColor: eat.is_available ? '#0056b3' : '#5a6268',
+                                },
+                            }}
+                            disabled={!eat.is_available}
+                        >
+                            {eat.is_available ? 'Open' : 'Closed'}
+                        </Button>
+                    </Box>
                     {eat.image_url && (
                         <CardMedia
                             component="img"
@@ -76,26 +110,11 @@ const EatsDetailPage = () => {
                         <Typography variant="subtitle1" component="span" sx={{ fontWeight: 'bold' }}>
                             Food Tags: 
                         </Typography>
-                        {eat.tags && eat.tags.map(tag => (
-                            <Chip key={tag} label={tag} sx={{ ml: 1, mt: 1 }} />
+                        {eat.tags && eat.tags.map((tag, index) => (
+                            <Chip key={index} label={tag} sx={{ ml: 1, mt: 1 }} />
                         ))}
                     </Box>
                     <Box mb={2}>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: eat.is_available ? '#007bff' : '#6c757d',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                ':hover': {
-                                    backgroundColor: eat.is_available ? '#0056b3' : '#5a6268',
-                                },
-                                mr: 2, // 오른쪽에 마진 추가
-                            }}
-                            disabled
-                        >
-                            {eat.is_available ? 'Open' : 'Closed'}
-                        </Button>
                         {eat.is_available && !userHasDibs && eat.user_id !== parseInt(userId) && (
                             <Button
                                 onClick={handleDibsClick}

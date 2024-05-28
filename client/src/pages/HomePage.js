@@ -53,9 +53,14 @@ const HomePage = () => {
       <CssBaseline />
       <Container maxWidth="md">
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            SHARE KINDNESS, SAVE THE EARTH
-          </Typography>
+        <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              sx={{ color: 'green', fontWeight: 'bold' }} // 그린 계열 색상으로 두껍게 설정
+            >
+              SHARE KINDNESS, SAVE THE EARTH
+            </Typography>
           <Typography variant="h6" component="p" gutterBottom>
             Discover and share delicious meals with your community. Join us to explore new tastes and make a positive impact.
           </Typography>

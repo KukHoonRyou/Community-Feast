@@ -9,12 +9,12 @@ const theme = createTheme({
   },
 });
 
-const MyDibsPage = ({ onDibsFetch }) => {
+const MyDibsPage = ({ onDibsFetch, userId }) => {
   const [dibs, setDibs] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/dibs/0')
+    fetch(`/dibs?user_id=${userId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -30,7 +30,7 @@ const MyDibsPage = ({ onDibsFetch }) => {
       .catch(error => {
         setError(error.toString());
       });
-  }, [onDibsFetch]);
+  }, [onDibsFetch, userId]);
 
   if (error) {
     return <Container><Typography color="error">Error: {error}</Typography></Container>;
@@ -47,7 +47,7 @@ const MyDibsPage = ({ onDibsFetch }) => {
           <Grid item xs={3}>
             <Box
               component="img"
-              src={dib.image_url || "/static/images/cards/default.jpg"}
+              src={dib.eats_image_url || "/static/images/cards/default.jpg"}
               alt={dib.eats_name}
               sx={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 1 }}
             />

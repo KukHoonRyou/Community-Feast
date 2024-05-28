@@ -17,44 +17,56 @@ const AboutPage = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="md">
-        <Box sx={{ my: 4, textAlign: 'center', mt: 20 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            About Community Feast
-          </Typography>
-          <Divider sx={{ mb: 4 }} />
-          <Typography variant="body1" paragraph>
-            Welcome to Community Feast! Our mission is to reduce food waste and provide a platform where community members can share food with each other. Whether you have extra food to give away or are looking for something to eat, Community Feast is here to help.
-          </Typography>
-          
-          <Typography variant="h5" component="h2" gutterBottom>
-            How It Works
-          </Typography>
-          <Divider sx={{ mb: 4 }} />
-          <Typography variant="body1" paragraph>
-            <strong>For Donors (Eats):</strong> If you have food to share, simply post a description and picture of the food along with the location and availability times. Other community members can then view and reserve the food.
-          </Typography>
-          <Typography variant="body1" paragraph>
-            <strong>For Receivers (Dibs):</strong> Browse the available food listings and reserve what you need. You can then arrange to pick it up at the specified location and time.
-          </Typography>
+      <Box
+        sx={{
+          backgroundImage: 'url("https://img.freepik.com/free-photo/digital-art-with-planet-earth_23-2151064472.jpg")', // 여기에 배경 이미지 경로를 넣으세요
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          mt: -10,
+        }}
+      >
+        <Container maxWidth="md">
+          <Box sx={{ my: 4, textAlign: 'center', mt: 0, backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: 4, borderRadius: 2 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              About Community Feast
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Typography variant="body1" paragraph>
+              Welcome to Community Feast! Our mission is to reduce food waste and provide a platform where community members can share food with each other. Whether you have extra food to give away or are looking for something to eat, Community Feast is here to help.
+            </Typography>
+            
+            <Typography variant="h5" component="h2" gutterBottom>
+              How It Works
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Typography variant="body1" paragraph>
+              <strong>For Donors (Eats):</strong> If you have food to share, simply post a description and picture of the food along with the location and availability times. Other community members can then view and reserve the food.
+            </Typography>
+            <Typography variant="body1" paragraph>
+              <strong>For Receivers (Dibs):</strong> Browse the available food listings and reserve what you need. You can then arrange to pick it up at the specified location and time.
+            </Typography>
 
-          <Typography variant="h5" component="h2" gutterBottom>
-            Our Mission
-          </Typography>
-          <Divider sx={{ mb: 4 }} />
-          <Typography variant="body1" paragraph>
-            Our mission is to create a sustainable community where food is shared and valued, reducing waste and helping those in need. We believe in the power of community and the positive impact of sharing resources.
-          </Typography>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Our Mission
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Typography variant="body1" paragraph>
+              Our mission is to create a sustainable community where food is shared and valued, reducing waste and helping those in need. We believe in the power of community and the positive impact of sharing resources.
+            </Typography>
 
-          <Typography variant="h5" component="h2" gutterBottom>
-            Get Involved
-          </Typography>
-          <Divider sx={{ mb: 4 }} />
-          <Typography variant="body1" paragraph>
-            Join our community today and start sharing! Whether you have extra food or are in need of a meal, your participation helps make a difference.
-          </Typography>
-        </Box>
-      </Container>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Get Involved
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Typography variant="body1" paragraph>
+              Join our community today and start sharing! Whether you have extra food or are in need of a meal, your participation helps make a difference.
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 };

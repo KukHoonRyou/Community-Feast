@@ -22,6 +22,7 @@ import AdminPage from './pages/AdminPage';
 import AdminUserManagePage from './components/Administration/AdminUserManagePage';
 import AdminEatsManagePage from './components/Administration/AdminEatsManagePage';
 import AdminDibsManagePage from './components/Administration/AdminDibsManagePage';
+import AdminTagsManagePage from './components/Administration/AdminTagsManagePage';
 import FoodTagsPage from './pages/FoodTagsPage';
 import FoodTagsListPage from './components/FoodTags/FoodTagsListPage';
 import FoodTagsDetailPage from './components/FoodTags/FoodTagsDetailPage';
@@ -83,6 +84,7 @@ function App() {
             <Route path="/admin/users" element={<AdminUserManagePage />} />
             <Route path="/admin/eats" element={<AdminEatsManagePage />} />
             <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
+            <Route path="/admin/tags" element={<AdminTagsManagePage />} />
             <Route path="/logout" element={handleLogout} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

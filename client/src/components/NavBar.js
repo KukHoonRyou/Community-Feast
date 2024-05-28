@@ -61,33 +61,37 @@ function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
   };
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
-    switch (newValue) {
-      case 0:
-        navigate('/');
-        break;
-      case 1:
-        navigate('/about');
-        break;
-      case 2:
-        navigate('/eats');
-        break;
-      case 3:
-        navigate('/dibs/:id');
-        break;
-      case 4:
-        navigate('/users');
-        break;
-      case 5:
-        navigate('/foodtags');
-        break;
-      case 6:
-        if (isAdmin) {
-          navigate('/admin');
-        }
-        break;
-      default:
-        break;
+    if (!isLogin && newValue > 1) {
+      navigate('/login');
+    } else {
+      setValue(newValue);
+      switch (newValue) {
+        case 0:
+          navigate('/');
+          break;
+        case 1:
+          navigate('/about');
+          break;
+        case 2:
+          navigate('/eats');
+          break;
+        case 3:
+          navigate('/dibs/:id');
+          break;
+        case 4:
+          navigate('/foodtags');
+          break;
+        case 5:
+          navigate('/users');
+          break;
+        case 6:
+          if (isAdmin) {
+            navigate('/admin');
+          }
+          break;
+        default:
+          break;
+      }
     }
   };
 
@@ -101,8 +105,8 @@ function NavBar({ isLogin, isAdmin, setIsLogin, setIsAdmin }) {
             <Tab label="About" {...a11yProps(1)} />
             <Tab label="Eats" {...a11yProps(2)} />
             <Tab label="Dibs" {...a11yProps(3)} />
-            <Tab label="User" {...a11yProps(4)} />
-            <Tab label="Food Tags" {...a11yProps(5)} />
+            <Tab label="Food Tags" {...a11yProps(4)} />
+            <Tab label="User" {...a11yProps(5)} />
             {isAdmin && <Tab label="Admin" {...a11yProps(6)} />}
           </Tabs>
           <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>

@@ -25,6 +25,9 @@ const AdminPage = () => {
           <Button variant="contained" color="primary" onClick={() => navigateToPage('/admin/users')}>
             Manage Users
           </Button>
+          <Button variant="contained" color="primary" onClick={() => navigateToPage('/admin/tags')}>
+            Manage Tags
+          </Button>
         </Box>
       </Box>
     </Container>

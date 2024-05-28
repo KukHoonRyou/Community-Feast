@@ -10,8 +10,6 @@ const theme = createTheme({
 });
 
 const EatsListPage = () => {
-  // eslint-disable-next-line no-unused-vars
-  const [eats, setEats] = useState([]);
   const [myEats, setMyEats] = useState([]);
   const [activeEats, setActiveEats] = useState([]);
   const [dibbedEats, setDibbedEats] = useState([]);
@@ -26,7 +24,6 @@ const EatsListPage = () => {
         }
         const data = await response.json();
         if (Array.isArray(data)) {
-          setEats(data);
           const filteredMyEats = data.filter(eat => eat.user_id === parseInt(userId));
           const filteredActiveEats = data.filter(eat => eat.is_available && eat.user_id !== parseInt(userId));
           const filteredDibbedEats = data.filter(eat => !eat.is_available && eat.user_id !== parseInt(userId));
@@ -34,14 +31,12 @@ const EatsListPage = () => {
           setActiveEats(filteredActiveEats);
           setDibbedEats(filteredDibbedEats);
         } else {
-          setEats([]);
           setMyEats([]);
           setActiveEats([]);
           setDibbedEats([]);
         }
       } catch (error) {
         console.error('Error fetching eats:', error);
-        setEats([]);
         setMyEats([]);
         setActiveEats([]);
         setDibbedEats([]);
@@ -88,7 +83,7 @@ const EatsListPage = () => {
                     backgroundColor: eat.is_available ? '#0056b3' : '#5a6268',
                   },
                 }}
-                disabled
+                disabled={!eat.is_available}
               >
                 {eat.is_available ? "Open" : "Closed"}
               </Button>
