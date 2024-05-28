@@ -1,126 +1,81 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { ImageList, ImageListItem, Container, CssBaseline, Typography, ThemeProvider, createTheme, Box } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
 
-const HomePage = ({ isLogin }) => {
-  const [recentEats, setRecentEats] = useState([]);
-  const [dibs, setDibs] = useState([]);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const userId = localStorage.getItem('userId');
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
-  useEffect(() => {
-    // 로그인한 경우에만 최근 eats와 dibs를 가져옴
-    if (isLogin) {
-      // 모든 eats를 가져온 후 가장 최근 추가된 5개의 eats를 선택
-      fetch('/eats')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          const sortedEats = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-          setRecentEats(sortedEats.slice(0, 5)); // 가장 최근 5개의 eats를 설정
-        })
-        .catch(error => {
-          setError(error.toString());
-        });
-
-      // 현재 사용자의 dibs 가져오기
-      if (userId) {
-        fetch('/dibs/0')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            setDibs(data.filter(dib => dib.user_id === parseInt(userId)));
-          })
-          .catch(error => {
-            setError(error.toString());
-          });
-      }
-    }
-  }, [isLogin, userId]);
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  const handleEatClick = (id) => {
-    navigate(`/eats/${id}`);
-  };
-
-  const handleDibClick = (id) => {
-    navigate(`/dibs/${id}`);
-  };
+const HomePage = () => {
+  const itemData = [
+    {
+      img: 'https://www.motherspridepreschool.com/news/wp-content/uploads/2019/11/food-sharing-activity-2019-0003.jpg',
+      title: 'Breakfast',
+    },
+    {
+      img: 'https://www.treehugger.com/thmb/Oc1ljI2tc9y0SKpEhARFfd22n7w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/OLIO-Handover5-Credit-AnnabelStaff-99a548648a7348c0bbfdcd060004a647.jpg',
+      title: 'Burger',
+    },
+    {
+      img: 'https://static.mothership.sg/1/2017/03/15304603_640967402740710_581454099308359652_o.jpg',
+      title: 'Camera',
+    },
+    {
+      img: 'https://www.ifco.com/media/uberization-of-food-1180x786.jpg',
+      title: 'Coffee',
+    },
+    {
+      img: 'https://familyapp.com/wp-content/uploads/2021/07/the-3-best-food-sharing-apps_iruro0f.jpg',
+      title: 'Hats',
+    },
+    {
+      img: 'https://www.vrg.org/blog/wp-content/uploads/2022/04/depositphotos_339323212-stock-illustration-please-stop-food-waste-handwritten.jpg',
+      title: 'Honey',
+    },
+    {
+      img: 'https://static01.nyt.com/images/2018/03/22/style/22mealshare-1/00mealshare-1-superJumbo.jpg',
+      title: 'Basketball',
+    },
+    {
+      img: 'https://thereader.mitpress.mit.edu/wp-content/uploads/2020/11/lead-graphic.jpg',
+      title: 'Fern',
+    },
+    {
+      img: 'https://news.leavitt.com/wp-content/uploads/2020/05/Dining-Together_web600.jpg',
+      title: 'Mushrooms',
+    },
+  ];
 
   return (
-    <div style={homeContainerStyle}>
-      {isLogin ? (
-        <>
-          <h2>Recent Eats</h2>
-          {recentEats.length > 0 ? (
-            recentEats.map(eat => (
-              <div key={eat.id} style={cardStyle} onClick={() => handleEatClick(eat.id)}>
-                <p>Eat Name: {eat.eats_name}</p>
-                <p>Description: {eat.description}</p>
-                <p>Created At: {new Date(eat.created_at).toLocaleString()}</p>
-              </div>
-            ))
-          ) : (
-            <p>There Is No Recent eats.</p>
-          )}
-
-          <h2>My Dibs</h2>
-          {dibs.length > 0 ? (
-            dibs.map(dib => (
-              <div key={dib.id} style={cardStyle} onClick={() => handleDibClick(dib.id)}>
-                <p>Status: {dib.dib_status ? 'Open' : 'Closed'}</p>
-                <p>Created At: {new Date(dib.created_at).toLocaleString()}</p>
-                <p>Eat Name: {dib.eats_name}</p>
-              </div>
-            ))
-          ) : (
-            <p>You Should Dib!</p>
-          )}
-        </>
-      ) : (
-        <p>Please log in to view Recent Eats and My Dibs.</p>
-      )}
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            SHARE KINDNESS, SAVE THE EARTH
+          </Typography>
+          <Typography variant="h6" component="p" gutterBottom>
+            Discover and share delicious meals with your community. Join us to explore new tastes and make a positive impact.
+          </Typography>
+        </Box>
+        <ImageList sx={{ width: '100%', height: 'auto' }} cols={3} gap={12}>
+          {itemData.map((item) => (
+            <ImageListItem key={item.img} sx={{ width: '100%', height: 200, overflow: 'hidden', aspectRatio: '1/1' }}>
+              <img
+                srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
+                alt={item.title}
+                loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </Container>
+    </ThemeProvider>
   );
 };
 
 export default HomePage;
-
-// 인라인 스타일 정의
-const homeContainerStyle = {
-  padding: '16px',
-};
-
-const cardStyle = {
-  marginBottom: '16px',
-  padding: '16px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  cursor: 'pointer',
-  transition: 'transform 0.2s',
-};
-
-const cardStyleHover = {
-  ...cardStyle,
-  transform: 'scale(1.02)',
-};
-
-const itemStyle = {
-  marginBottom: '16px',
-  padding: '16px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-};

@@ -1,24 +1,12 @@
 import React from 'react';
-import EatsListPage from '../components/Eats/EatsListPage';
+import EatsListPage from '../components/Eats/EatsListPage'; // EatsListPage의 경로를 올바르게 설정해주세요.
 
 const EatsPage = () => {
   return (
-    <div style={styles.page}>
-      <h1 style={styles.heading}>All Eats</h1>
+    <div>
       <EatsListPage />
     </div>
   );
-};
-
-const styles = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  heading: {
-    marginBottom: '20px',
-  },
 };
 
 export default EatsPage;

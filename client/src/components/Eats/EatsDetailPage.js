@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import MyDibsPage from '../../pages/MyDibsPage'; // MyDibsPage 컴포넌트를 가져옵니다.
+import MyDibsPage from '../../pages/MyDibsPage';
+import { Container, Box, Typography, Button, Chip, CircularProgress, Paper, CardMedia, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const EatsDetailPage = () => {
     const { id } = useParams();
@@ -8,7 +16,7 @@ const EatsDetailPage = () => {
     const [error, setError] = useState(null);
     const [dibs, setDibs] = useState([]);
     const navigate = useNavigate();
-    const userId = localStorage.getItem('userId'); // 로컬 스토리지에서 사용자 ID를 가져옵니다.
+    const userId = localStorage.getItem('userId');
 
     useEffect(() => {
         fetch(`/eats/${id}`)
@@ -27,7 +35,7 @@ const EatsDetailPage = () => {
     }, [id]);
 
     const handleDibsClick = () => {
-        navigate(`/dibs/create?eatId=${id}`); // URL에 eatId를 포함하여 전송
+        navigate(`/dibs/create?eatId=${id}`);
     };
 
     const handleDibsFetch = (fetchedDibs) => {
@@ -35,87 +43,92 @@ const EatsDetailPage = () => {
     };
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <Container><Typography color="error">{error}</Typography></Container>;
     }
 
     if (!eat) {
-        return <div>Loading...</div>;
+        return <Container><CircularProgress /></Container>;
     }
 
     const userHasDibs = dibs.some(dib => dib.user_id === parseInt(userId));
 
     return (
-        <div style={detailContainerStyle}>
-            <h2>{eat.eats_name}</h2>
-            <p>{eat.description}</p>
-            <div>
-                <strong>Food Tags: </strong>
-                {eat && eat.tags && eat.tags.map(tag => (
-                    <span key={tag} style={tagStyle}>{tag}</span>
-                ))}
-            </div>
-            <button
-                style={{
-                    backgroundColor: eat.is_available ? 'green' : 'red',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'default',
-                    fontWeight: 'bold',
-                }}
-                disabled
-            >
-                {eat.is_available ? 'Open' : 'Closed'}
-            </button>
-            {eat.user_id === parseInt(userId) ? (
-                <p style={messageStyle}>Thanks for sharing!</p>
-            ) : (
-                eat.is_available ? (
-                    !userHasDibs ? (
-                        <button onClick={handleDibsClick} style={buttonStyle}>
-                            Dibs
-                        </button>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Container>
+                <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+                    <Typography variant="h4" component="h2" gutterBottom>
+                        {eat.eats_name}
+                    </Typography>
+                    {eat.image_url && (
+                        <CardMedia
+                            component="img"
+                            height="300"
+                            image={eat.image_url}
+                            alt={eat.eats_name}
+                            sx={{ mb: 2 }}
+                        />
+                    )}
+                    <Typography variant="body1" paragraph>
+                        {eat.description}
+                    </Typography>
+                    <Box mb={2}>
+                        <Typography variant="subtitle1" component="span" sx={{ fontWeight: 'bold' }}>
+                            Food Tags: 
+                        </Typography>
+                        {eat.tags && eat.tags.map(tag => (
+                            <Chip key={tag} label={tag} sx={{ ml: 1, mt: 1 }} />
+                        ))}
+                    </Box>
+                    <Box mb={2}>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                backgroundColor: eat.is_available ? '#007bff' : '#6c757d',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                ':hover': {
+                                    backgroundColor: eat.is_available ? '#0056b3' : '#5a6268',
+                                },
+                                mr: 2, // 오른쪽에 마진 추가
+                            }}
+                            disabled
+                        >
+                            {eat.is_available ? 'Open' : 'Closed'}
+                        </Button>
+                        {eat.is_available && !userHasDibs && eat.user_id !== parseInt(userId) && (
+                            <Button
+                                onClick={handleDibsClick}
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    ':hover': {
+                                        backgroundColor: '#0056b3',
+                                    },
+                                }}
+                            >
+                                Dibs
+                            </Button>
+                        )}
+                    </Box>
+                    {eat.user_id === parseInt(userId) ? (
+                        <Typography color="primary" fontWeight="bold">Thanks for sharing!</Typography>
                     ) : (
-                        <p style={messageStyle}>There is already an ongoing dibs, so you cannot create another one.</p>
-                    )
-                ) : (
-                    <p style={messageStyle}>Someone else already called dibs!!</p>
-                )
-            )}
-            <MyDibsPage onDibsFetch={handleDibsFetch} />
-        </div>
+                        eat.is_available ? (
+                            userHasDibs ? (
+                                <Typography color="secondary" fontWeight="bold">There is already an ongoing dibs, so you cannot create another one.</Typography>
+                            ) : null
+                        ) : (
+                            <Typography color="secondary" fontWeight="bold">Someone else already called dibs!!</Typography>
+                        )
+                    )}
+                    <MyDibsPage onDibsFetch={handleDibsFetch} />
+                </Paper>
+            </Container>
+        </ThemeProvider>
     );
 };
 
 export default EatsDetailPage;
-
-// 인라인 스타일 정의
-const detailContainerStyle = {
-    padding: '16px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-};
-
-const buttonStyle = {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-};
-
-const messageStyle = {
-    color: 'purple',
-    fontWeight: 'bold',
-};
-
-const tagStyle = {
-    backgroundColor: '#f0f0f0',
-    color: '#333',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    marginRight: '8px',
-};

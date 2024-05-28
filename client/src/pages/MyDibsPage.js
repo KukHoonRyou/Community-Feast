@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Reviews from '../components/ReviewsAndRatings/Reviews';
+import { Typography, Container, Grid, Paper, Box, Chip, Divider, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const MyDibsPage = ({ onDibsFetch }) => {
   const [dibs, setDibs] = useState([]);
@@ -25,45 +33,69 @@ const MyDibsPage = ({ onDibsFetch }) => {
   }, [onDibsFetch]);
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <Container><Typography color="error">Error: {error}</Typography></Container>;
   }
 
   if (!dibs.length) {
-    return <div>No Dibs found.</div>;
+    return <Container><Typography>No Dibs found.</Typography></Container>;
   }
 
+  const renderDibCard = (dib) => (
+    <Grid item xs={12} key={dib.id}>
+      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={3}>
+            <Box
+              component="img"
+              src={dib.image_url || "/static/images/cards/default.jpg"}
+              alt={dib.eats_name}
+              sx={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 1 }}
+            />
+          </Grid>
+          <Grid item xs={9}>
+            <Typography variant="h6" component="div" gutterBottom>
+              {dib.eats_name}
+            </Typography>
+            <Divider />
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Created At: {new Date(dib.created_at).toLocaleString()}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              User ID: {dib.user_id}
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {dib.tags && dib.tags.map((tag, index) => (
+                <Chip key={index} label={tag} size="small" />
+              ))}
+            </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6">Contact</Typography>
+              <Divider />
+              <Typography variant="body2">Phone: {dib.eats_user_phone}</Typography>
+              <Typography variant="body2">Address: {dib.eats_user_address}</Typography>
+            </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6">Reviews</Typography>
+              <Divider sx={{ mt: 1 }} />
+              <Reviews dibsId={dib.id} dib={dib} />
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Grid>
+  );
+
   return (
-    <div style={detailContainerStyle}>
-      <h2>My Dibs</h2>
-      {dibs.map(dib => (
-        <div key={dib.id} style={dibItemStyle}>
-          <p>Status: {dib.dib_status ? 'Open' : 'Closed'}</p>
-          <p>Created At: {new Date(dib.created_at).toLocaleString()}</p>
-          <p>Eat Name: {dib.eats_name}</p>
-          <p>User ID: {dib.user_id}</p>
-          <h2>Contact</h2>
-          <p>Phone: {dib.eats_user_phone}</p>
-          <p>Address: {dib.eats_user_address}</p>
-          <Reviews dibsId={dib.id} dib={dib} />
-        </div>
-      ))}
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container sx={{ py: 4 }}>
+        <Typography variant="h4" gutterBottom>My Dibs</Typography>
+        <Grid container spacing={2}>
+          {dibs.map(dib => renderDibCard(dib))}
+        </Grid>
+      </Container>
+    </ThemeProvider>
   );
 };
 
 export default MyDibsPage;
-
-const detailContainerStyle = {
-  padding: '16px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-};
-
-const dibItemStyle = {
-  marginBottom: '16px',
-  padding: '16px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-};

@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import {
+  Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, Dialog, DialogTitle, DialogContent, DialogActions, Rating
+} from '@mui/material';
 
 const AdminUserManagePage = () => {
   const [users, setUsers] = useState([]);
   const [editableUser, setEditableUser] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState({ title: '', content: '' });
 
   useEffect(() => {
     fetch('/users')
@@ -12,15 +17,18 @@ const AdminUserManagePage = () => {
   }, []);
 
   const handleDelete = id => {
-    fetch(`/users/${id}`, {
-      method: 'DELETE',
-    })
-      .then(response => {
-        if (response.ok) {
-          setUsers(users.filter(user => user.id !== id));
-        }
+    const confirmed = window.confirm('Are you sure you want to delete this user?');
+    if (confirmed) {
+      fetch(`/users/${id}`, {
+        method: 'DELETE',
       })
-      .catch(error => console.error('Error deleting user:', error));
+        .then(response => {
+          if (response.ok) {
+            setUsers(users.filter(user => user.id !== id));
+          }
+        })
+        .catch(error => console.error('Error deleting user:', error));
+    }
   };
 
   const handleEdit = user => {
@@ -66,86 +74,168 @@ const AdminUserManagePage = () => {
       .catch(error => console.error('Error updating user:', error));
   };
 
+  const handleDialogOpen = (title, content) => {
+    setDialogContent({ title, content });
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setDialogContent({ title: '', content: '' });
+  };
+
   return (
-    <div>
-      <h1>Manage Users</h1>
+    <Container maxWidth="xl">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Manage Users
+      </Typography>
       {editableUser ? (
-        <div>
-          <h2>Editing User: {editableUser.username}</h2>
-          <label>
-            Username:
-            <input type="text" name="username" value={editableUser.username} onChange={handleChange} />
-          </label>
-          <label>
-            First Name:
-            <input type="text" name="first_name" value={editableUser.first_name} onChange={handleChange} />
-          </label>
-          <label>
-            Last Name:
-            <input type="text" name="last_name" value={editableUser.last_name} onChange={handleChange} />
-          </label>
-          <label>
-            Email:
-            <input type="email" name="email_address" value={editableUser.email_address} onChange={handleChange} />
-          </label>
-          <label>
-            Phone Number:
-            <input type="text" name="phone_number" value={editableUser.phone_number} onChange={handleChange} />
-          </label>
-          <label>
-            Address:
-            <input type="text" name="address" value={editableUser.address} onChange={handleChange} />
-          </label>
-          <label>
-            Allergic Info:
-            <input type="text" name="allergic_info" value={editableUser.allergic_info} onChange={handleChange} />
-          </label>
-          <button onClick={handleUpdate}>Update</button>
-        </div>
+        <Paper sx={{ p: 3, mt: 3 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Editing User: {editableUser.username}
+          </Typography>
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Username"
+              name="username"
+              value={editableUser.username}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="First Name"
+              name="first_name"
+              value={editableUser.first_name}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Last Name"
+              name="last_name"
+              value={editableUser.last_name}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Email"
+              name="email_address"
+              type="email"
+              value={editableUser.email_address}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Phone Number"
+              name="phone_number"
+              value={editableUser.phone_number}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Address"
+              name="address"
+              value={editableUser.address}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Allergic Info"
+              name="allergic_info"
+              value={editableUser.allergic_info}
+              onChange={handleChange}
+              fullWidth
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button variant="contained" color="primary" onClick={handleUpdate}>
+                Update
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Phone Number</th>
-              <th>Address</th>
-              <th>Allergic Info</th>
-              <th>Is Admin</th>
-              <th>Average Rating</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.first_name}</td>
-                <td>{user.last_name}</td>
-                <td>{user.email_address}</td>
-                <td>{user.phone_number}</td>
-                <td>{user.address}</td>
-                <td>{user.allergic_info}</td>
-                <td>
-                  <button onClick={() => handleToggleAdmin(user.id)}>
-                    {user.isAdmin ? 'Yes' : 'No'}
-                  </button>
-                </td>
-                <td>{user.average_rating != null ? user.average_rating.toFixed(2) : 'N/A'}</td>
-                <td>
-                  <button onClick={() => handleEdit(user)}>Edit</button>
-                  <button onClick={() => handleDelete(user.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper} sx={{ mt: 3 }}>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Username</TableCell>
+                  <TableCell>First Name</TableCell>
+                  <TableCell>Last Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Phone Number</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>Allergic Info</TableCell>
+                  <TableCell>Is Admin</TableCell>
+                  <TableCell>Average Rating</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map(user => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.id}</TableCell>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.first_name}</TableCell>
+                    <TableCell>{user.last_name}</TableCell>
+                    <TableCell>
+                      <Button variant="contained" onClick={() => handleDialogOpen('Email', user.email_address)}>
+                        View
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="contained" onClick={() => handleDialogOpen('Phone Number', user.phone_number)}>
+                        View
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="contained" onClick={() => handleDialogOpen('Address', user.address)}>
+                        View
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="contained" onClick={() => handleDialogOpen('Allergic Info', user.allergic_info)}>
+                        View
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="contained" color={user.isAdmin ? "success" : "warning"} onClick={() => handleToggleAdmin(user.id)}>
+                        {user.isAdmin ? 'Yes' : 'No'}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Rating value={user.average_rating || 0} precision={0.5} readOnly />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button variant="contained" color="info" onClick={() => handleEdit(user)}>Edit</Button>
+                        <Button variant="contained" color="error" onClick={() => handleDelete(user.id)}>Delete</Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </TableContainer>
       )}
-    </div>
+
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>{dialogContent.title}</DialogTitle>
+        <DialogContent>
+          <Typography>{dialogContent.content}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 

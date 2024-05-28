@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, Typography, TextField, Button, Paper, Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+
+const theme = createTheme();
 
 const UserInfoManagePage = () => {
   const [formData, setFormData] = useState({
@@ -99,101 +102,87 @@ const UserInfoManagePage = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Manage User Information</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="first_name">First Name:</label>
-          <input
-            type="text"
-            id="first_name"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="last_name">Last Name:</label>
-          <input
-            type="text"
-            id="last_name"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="email_address">Email Address:</label>
-          <input
-            type="email"
-            id="email_address"
-            name="email_address"
-            value={formData.email_address}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="phone_number">Phone Number:</label>
-          <input
-            type="text"
-            id="phone_number"
-            name="phone_number"
-            value={formData.phone_number}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="allergic_info">Allergic Information:</label>
-          <input
-            type="text"
-            id="allergic_info"
-            name="allergic_info"
-            value={formData.allergic_info}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">Update Information</button>
-        <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Account</button>
-      </form>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container component="main" maxWidth="sm">
+        <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
+          <Typography component="h1" variant="h5" gutterBottom>
+            Manage User Information
+          </Typography>
+          {error && <Typography color="error">{error}</Typography>}
+          {success && <Typography color="success">{success}</Typography>}
+          <form onSubmit={handleSubmit}>
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="First Name"
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Last Name"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Email Address"
+              name="email_address"
+              value={formData.email_address}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Phone Number"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Allergic Information"
+              name="allergic_info"
+              value={formData.allergic_info}
+              onChange={handleChange}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <Button type="submit" variant="contained" color="primary">
+                Update Information
+              </Button>
+              <Button variant="contained" color="error" onClick={handleDelete}>
+                Delete Account
+              </Button>
+            </Box>
+          </form>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
-};
-
-const styles = {
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    marginTop: '10px',
-    marginLeft: '10px',
-  }
 };
 
 export default UserInfoManagePage;

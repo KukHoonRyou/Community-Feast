@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
+// import { Button, Paper, Box } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemButton, Divider, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const UserDibsManagePage = () => {
   const [dibs, setDibs] = useState([]);
-  const [selectedDib, setSelectedDib] = useState(null);
-  const [formData, setFormData] = useState({
-    dib_status: true,
-  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
@@ -24,57 +23,15 @@ const UserDibsManagePage = () => {
     fetchDibs();
   }, [userId]);
 
-  const handleSelectDib = (dib) => {
-    setSelectedDib(dib);
-    setFormData({
-      dib_status: dib.dib_status,
-    });
-  };
+  const handleDelete = async (dibId, eatsId) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this dib?');
+    if (!confirmDelete) return;
 
-  const handleChange = (e) => {
-    const { name, type, checked } = e.target;
-    const value = type === 'checkbox' ? checked : e.target.value;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
     setError('');
     setSuccess('');
 
     try {
-      const response = await fetch(`/dibs/${selectedDib.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setSuccess('Dib information updated successfully.');
-        // Dibs 목록을 다시 불러와서 업데이트된 정보를 반영합니다.
-        const updatedDibs = dibs.map(dib => dib.id === selectedDib.id ? { ...dib, ...formData } : dib);
-        setDibs(updatedDibs);
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to update dib information.');
-      }
-    } catch (error) {
-      setError('Error updating dib information.');
-    }
-  };
-
-  const handleDelete = async () => {
-    setError('');
-    setSuccess('');
-
-    try {
-      const response = await fetch(`/dibs/${selectedDib.id}`, {
+      const response = await fetch(`/dibs/${dibId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -83,7 +40,7 @@ const UserDibsManagePage = () => {
 
       if (response.ok) {
         // Eats의 is_available 상태를 true로 업데이트
-        await fetch(`/eats/${selectedDib.eats_id}`, {
+        await fetch(`/eats/${eatsId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -94,9 +51,8 @@ const UserDibsManagePage = () => {
 
         setSuccess('Dib deleted successfully.');
         // Dibs 목록에서 삭제된 Dib를 제거합니다.
-        const updatedDibs = dibs.filter(dib => dib.id !== selectedDib.id);
+        const updatedDibs = dibs.filter(dib => dib.id !== dibId);
         setDibs(updatedDibs);
-        setSelectedDib(null);
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to delete dib.');
@@ -107,78 +63,34 @@ const UserDibsManagePage = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Manage Your Dibs</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+    <Container component="main" maxWidth="md">
+      <Typography component="h1" variant="h5" gutterBottom>
+        Manage Your Dibs
+      </Typography>
+      {error && <Typography color="error">{error}</Typography>}
+      {success && <Typography color="success">{success}</Typography>}
       
-      <h2>Your Dibs</h2>
-      {dibs.map(dib => (
-        <div key={dib.id} style={styles.dibItem} onClick={() => handleSelectDib(dib)}>
-          <h3>{dib.eats_name}</h3> {/* Eats의 이름 출력 */}
-          <p>{dib.created_at}</p>
-          <p>{dib.dib_status ? 'Open' : 'Closed'}</p>
-        </div>
-      ))}
-
-      {selectedDib && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <h2>Edit Dib: {selectedDib.eats_name}</h2> {/* Eats의 이름 출력 */}
-          <div>
-            <label htmlFor="dib_status">Dib Status:</label>
-            <input
-              type="checkbox"
-              id="dib_status"
-              name="dib_status"
-              checked={formData.dib_status}
-              onChange={handleChange}
-            />
-          </div>
-          <button type="submit" style={styles.updateButton}>Update Dib</button>
-          <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Dib</button> {/* 삭제 버튼 추가 */}
-        </form>
-      )}
-    </div>
+      <Typography component="h2" variant="h6" gutterBottom>
+        Your Dibs
+      </Typography>
+      <List>
+        {dibs.map((dib, index) => (
+          <React.Fragment key={dib.id}>
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemText primary={dib.eats_name} secondary={dib.created_at} />
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(dib.id, dib.eats_id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemButton>
+            </ListItem>
+            {index < dibs.length - 1 && <Divider />}
+          </React.Fragment>
+        ))}
+        {dibs.length > 0 && <Divider />} {/* 목록의 맨 밑에 라인 추가 */}
+      </List>
+    </Container>
   );
-};
-
-const styles = {
-  dibItem: {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '16px',
-    margin: '8px',
-    width: '300px',
-    cursor: 'pointer',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  form: {
-    marginTop: '20px',
-    padding: '20px',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    width: '300px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  updateButton: {
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    marginTop: '10px',
-    marginRight: '10px',
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    marginTop: '10px',
-  }
 };
 
 export default UserDibsManagePage;

@@ -1,5 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  Typography,
+  Paper,
+  Chip,
+  CssBaseline,
+  ThemeProvider,
+  createTheme
+} from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const EatsCreateFormPage = () => {
   const [formData, setFormData] = useState({
@@ -11,12 +32,12 @@ const EatsCreateFormPage = () => {
     allergic_ingredient: '',
     perishable: false,
     image_url: '',
-    food_tags: [],  // Food tags를 추가합니다.
+    food_tags: [],
   });
-  const [foodTags, setFoodTags] = useState([]);  // 사용 가능한 food tags를 저장합니다.
-  const [newFoodTag, setNewFoodTag] = useState(''); // 새로운 Food Tag 입력값을 저장합니다.
+  const [foodTags, setFoodTags] = useState([]);
+  const [newFoodTag, setNewFoodTag] = useState('');
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchFoodTags = async () => {
@@ -59,7 +80,7 @@ const EatsCreateFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting form data:', formData); // 전송하는 데이터 출력
+    console.log('Submitting form data:', formData);
 
     try {
       const response = await fetch('/eats', {
@@ -67,7 +88,7 @@ const EatsCreateFormPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, user_id: userId }), // 사용자 ID를 함께 전송합니다.
+        body: JSON.stringify({ ...formData, user_id: userId }),
       });
 
       if (!response.ok) {
@@ -101,79 +122,158 @@ const EatsCreateFormPage = () => {
 
       const data = await response.json();
       setFoodTags([...foodTags, data]);
-      setNewFoodTag(''); // 입력창을 초기화합니다.
+      setNewFoodTag('');
     } catch (error) {
       console.error('Failed to create food tag:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Eats Name:
-        <input type="text" name="eats_name" value={formData.eats_name} onChange={handleChange} required />
-      </label>
-      <label>
-        Category:
-        <input type="text" name="category" value={formData.category} onChange={handleChange} required />
-      </label>
-      <label>
-        Description:
-        <textarea name="description" value={formData.description} onChange={handleChange} required />
-      </label>
-      <label>
-        Cook Time:
-        <input type="text" name="cook_time" value={formData.cook_time} onChange={handleChange} required />
-      </label>
-      <label>
-        Quantity:
-        <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} required />
-      </label>
-      <label>
-        Allergic Ingredient:
-        <input type="text" name="allergic_ingredient" value={formData.allergic_ingredient} onChange={handleChange} />
-      </label>
-      <label>
-        Perishable:
-        <input type="checkbox" name="perishable" checked={formData.perishable} onChange={handleChange} />
-      </label>
-      <label>
-        Image URL:
-        <input type="text" name="image_url" value={formData.image_url} onChange={handleChange} />
-      </label>
-      <label>
-        Food Tags:
-        <div>
-          {foodTags.map((tag) => (
-            <button
-              type="button"
-              key={tag.id}
-              onClick={() => handleFoodTagClick(tag.id)}
-              style={{
-                backgroundColor: formData.food_tags.includes(tag.id) ? '#d4edda' : '#f8d7da',
-                margin: '2px',
-                padding: '5px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container component="main" maxWidth="sm">
+        <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+          <Typography component="h1" variant="h5" align="center" gutterBottom>
+            Create Eats
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="eats_name"
+              label="Eats Name"
+              name="eats_name"
+              autoComplete="eats_name"
+              autoFocus
+              value={formData.eats_name}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="category"
+              label="Category"
+              name="category"
+              autoComplete="category"
+              value={formData.category}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              multiline
+              rows={4}
+              id="description"
+              label="Description"
+              name="description"
+              autoComplete="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="cook_time"
+              label="Cook Time"
+              name="cook_time"
+              autoComplete="cook_time"
+              value={formData.cook_time}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              type="number"
+              id="quantity"
+              label="Quantity"
+              name="quantity"
+              autoComplete="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              id="allergic_ingredient"
+              label="Allergic Ingredient"
+              name="allergic_ingredient"
+              autoComplete="allergic_ingredient"
+              value={formData.allergic_ingredient}
+              onChange={handleChange}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.perishable}
+                  onChange={handleChange}
+                  name="perishable"
+                  color="primary"
+                />
+              }
+              label="Perishable"
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              id="image_url"
+              label="Image URL"
+              name="image_url"
+              autoComplete="image_url"
+              value={formData.image_url}
+              onChange={handleChange}
+            />
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Typography variant="body1" gutterBottom>
+                Food Tags:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {foodTags.map((tag) => (
+                  <Chip
+                    key={tag.id}
+                    label={tag.name}
+                    clickable
+                    color={formData.food_tags.includes(tag.id) ? 'primary' : 'default'}
+                    onClick={() => handleFoodTagClick(tag.id)}
+                  />
+                ))}
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                margin="normal"
+                fullWidth
+                id="new_food_tag"
+                label="Add New Food Tag"
+                value={newFoodTag}
+                onChange={handleNewFoodTagChange}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleNewFoodTagSubmit}
+                sx={{ mt: 2, height: 'fit-content' }}
+              >
+                Add
+              </Button>
+            </Box>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 3, mb: 2 }}
             >
-              {tag.name}
-            </button>
-          ))}
-        </div>
-      </label>
-      <label>
-        Add New Food Tag:
-        <input
-          type="text"
-          value={newFoodTag}
-          onChange={handleNewFoodTagChange}
-        />
-        <button type="button" onClick={handleNewFoodTagSubmit}>Add</button>
-      </label>
-      <button type="submit">Create Eats</button>
-    </form>
+              Create Eats
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 

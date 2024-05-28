@@ -26,6 +26,7 @@ import FoodTagsPage from './pages/FoodTagsPage';
 import FoodTagsListPage from './components/FoodTags/FoodTagsListPage';
 import FoodTagsDetailPage from './components/FoodTags/FoodTagsDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
+import Footer from './Footer'; // Footer 컴포넌트를 불러옵니다
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -54,36 +55,39 @@ function App() {
 
   return (
     <Router>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <NavBar isLogin={isLogin} isAdmin={isAdmin} setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />
-        <Routes>
-          <Route path="/" element={<HomePage isLogin={isLogin} />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/eats" element={<EatsPage />} />
-          <Route path="/eats/:id" element={<EatsDetailPage />} />
-          <Route path="/eats/list" element={<EatsListPage />} />
-          <Route path="/eats/create" element={<EatsCreateFormPage />} />
-          <Route path="/dibs/:id" element={<MyDibsPage />} />
-          <Route path="/dibs/create" element={<MyDibsFormPage />} />
-          <Route path="/dibs/history" element={<MyDibsHistoryPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/users/info" element={<UsersInfoManagePage />} />
-          <Route path="/users/eats" element={<UsersEatsManagePage />} />
-          <Route path="/users/dibs" element={<UsersDibsManagePage />} />
-          <Route path="/foodtags" element={<FoodTagsPage />} />
-          <Route path="/foodtags/list" element={<FoodTagsListPage />} />
-          <Route path="/foodtags/:id" element={<FoodTagsDetailPage />} />
-          <Route path="/login" element={<LoginPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
-          <Route path="/login/form" element={<LoginFormPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/signup/form" element={<SignupFormPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/users" element={<AdminUserManagePage />} />
-          <Route path="/admin/eats" element={<AdminEatsManagePage />} />
-          <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
-          <Route path="/logout" element={handleLogout} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <div style={{ flex: 1, marginTop: '64px' }}> {/* 네비게이션 바 높이만큼 마진 추가 */}
+          <Routes>
+            <Route path="/" element={<HomePage isLogin={isLogin} />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/eats" element={<EatsPage />} />
+            <Route path="/eats/:id" element={<EatsDetailPage />} />
+            <Route path="/eats/list" element={<EatsListPage />} />
+            <Route path="/eats/create" element={<EatsCreateFormPage />} />
+            <Route path="/dibs/:id" element={<MyDibsPage />} />
+            <Route path="/dibs/create" element={<MyDibsFormPage />} />
+            <Route path="/dibs/history" element={<MyDibsHistoryPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/info" element={<UsersInfoManagePage />} />
+            <Route path="/users/eats" element={<UsersEatsManagePage />} />
+            <Route path="/users/dibs" element={<UsersDibsManagePage />} />
+            <Route path="/foodtags" element={<FoodTagsPage />} />
+            <Route path="/foodtags/list" element={<FoodTagsListPage />} />
+            <Route path="/foodtags/:id" element={<FoodTagsDetailPage />} />
+            <Route path="/login" element={<LoginPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
+            <Route path="/login/form" element={<LoginFormPage setIsLogin={setIsLogin} setIsAdmin={setIsAdmin} />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/signup/form" element={<SignupFormPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/users" element={<AdminUserManagePage />} />
+            <Route path="/admin/eats" element={<AdminEatsManagePage />} />
+            <Route path="/admin/dibs" element={<AdminDibsManagePage />} />
+            <Route path="/logout" element={handleLogout} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+        <Footer /> {/* 푸터를 페이지 하단에 추가 */}
       </div>
     </Router>
   );

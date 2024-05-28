@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createTheme, ThemeProvider, CssBaseline, Container, Typography, TextField, Button, Box, Paper } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const LoginPage = ({ setIsLogin, setIsAdmin }) => {
   const [username, setUsername] = useState('');
@@ -33,37 +41,60 @@ const LoginPage = ({ setIsLogin, setIsAdmin }) => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Log In</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">User Name:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Log In</button>
-      </form>
-      <p>
-        Not Registered?{' '}
-        <button onClick={handleSignupRedirect}>Sign Up</button>
-      </p>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container component="main" maxWidth="xs">
+        <Paper elevation={3} sx={{ padding: 3, mt: 4 }}>
+          <Typography component="h1" variant="h5" align="center">
+            Log In
+          </Typography>
+          {error && <Typography color="error" align="center" sx={{ mt: 1 }}>{error}</Typography>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="User Name"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Log In
+            </Button>
+            <Typography align="center">
+              Not Registered?{' '}
+              <Button onClick={handleSignupRedirect} color="primary">
+                Sign Up
+              </Button>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 

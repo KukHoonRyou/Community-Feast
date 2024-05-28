@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { createTheme, ThemeProvider, CssBaseline, Container, Typography, Button, Box, TextField, Paper, Avatar, Chip } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const MyDibsFormPage = () => {
     const query = new URLSearchParams(useLocation().search);
     const eatId = query.get('eatId');
-    const [eatStatus, setEatStatus] = useState('Open');
+    const [eat, setEat] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [createdTime, setCreatedTime] = useState(new Date().toISOString().slice(0, 16)); // 현재 시간으로 초기화
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch the is_available status from the server
+        // Fetch the eat data from the server
         fetch(`/eats/${eatId}`)
             .then(response => {
                 if (!response.ok) {
@@ -19,44 +28,12 @@ const MyDibsFormPage = () => {
                 return response.json();
             })
             .then(data => {
-                setEatStatus(data.is_available ? 'Open' : 'Closed');
+                setEat(data);
             })
             .catch(error => {
                 setError(error.toString());
             });
     }, [eatId]);
-
-    const handleStatusToggle = () => {
-        const newStatus = eatStatus === 'Open' ? 'Closed' : 'Open';
-        setEatStatus(newStatus);
-
-        console.log(`Updating is_available to: ${newStatus === 'Open'}`); // 디버그용 콘솔 로그
-
-        fetch(`/eats/${eatId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                is_available: newStatus === 'Open',
-            }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.error || 'Network response was not ok');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Eat status updated:', data);
-        })
-        .catch(error => {
-            console.error('Error updating eat status:', error); // 오류를 콘솔에 출력
-            setError(error.toString());
-        });
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -68,7 +45,7 @@ const MyDibsFormPage = () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                dib_status: eatStatus === 'Open',
+                dib_status: false,
                 created_at: createdTime,
                 eats_id: eatId,
             }),
@@ -88,7 +65,7 @@ const MyDibsFormPage = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    is_available: eatStatus === 'Open',
+                    is_available: false,
                 }),
             });
         })
@@ -110,66 +87,87 @@ const MyDibsFormPage = () => {
     };
 
     return (
-        <div style={formContainerStyle}>
-            <h2>Reserve Eat</h2>
-            {error && <div style={errorStyle}>Error: {error}</div>}
-            <form onSubmit={handleSubmit}>
-                <div style={formGroupStyle}>
-                    <label>Eat Status:</label>
-                    <button type="button" onClick={handleStatusToggle} style={statusButtonStyle}>
-                        {eatStatus}
-                    </button>
-                </div>
-                <div style={formGroupStyle}>
-                    <label>Created Time:</label>
-                    <input
-                        type="datetime-local"
-                        value={createdTime}
-                        onChange={(e) => setCreatedTime(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" style={buttonStyle}>Reserve</button>
-            </form>
-        </div>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Container component="main" maxWidth="xs">
+                <Paper elevation={3} sx={{ padding: 2, marginTop: 4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                        <Typography component="h2" variant="h5">
+                            Create My Dibs
+                        </Typography>
+                        {eat && (
+                            <Button
+                                size="small"
+                                sx={{
+                                    backgroundColor: eat.is_available ? '#007bff' : '#6c757d',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    ':hover': {
+                                        backgroundColor: eat.is_available ? '#0056b3' : '#5a6268',
+                                    },
+                                }}
+                                disabled
+                            >
+                                {eat.is_available ? "Open" : "Closed"}
+                            </Button>
+                        )}
+                    </Box>
+                    {error && <Typography color="error" sx={{ marginBottom: 2 }}>{error}</Typography>}
+                    {eat && (
+                        <Box sx={{ textAlign: 'center', marginBottom: 2 }}>
+                            <Avatar
+                                src={eat.image_url || "/static/images/cards/default.jpg"}
+                                alt={eat.eats_name}
+                                sx={{ width: 120, height: 120, margin: 'auto' }}
+                            />
+                            <Typography variant="h6" sx={{ marginTop: 1 }}>
+                                {eat.eats_name}
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1, marginTop: 1 }}>
+                                {eat.tags.map((tag, index) => (
+                                    <Chip key={index} label={tag} />
+                                ))}
+                            </Box>
+                        </Box>
+                    )}
+                    <form onSubmit={handleSubmit}>
+                        <Box sx={{ position: 'relative', marginBottom: 2 }}>
+                            <TextField
+                                type="datetime-local"
+                                value={createdTime}
+                                fullWidth
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                sx={{
+                                    position: 'absolute',
+                                    right: 8,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    backgroundColor: '#007bff',
+                                    color: '#fff',
+                                    padding: '10px 20px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    borderRadius: '4px',
+                                    ':hover': {
+                                        backgroundColor: '#0056b3',
+                                    },
+                                }}
+                            >
+                                Dibs
+                            </Button>
+                        </Box>
+                    </form>
+                </Paper>
+            </Container>
+        </ThemeProvider>
     );
 };
 
 export default MyDibsFormPage;
-
-// 인라인 스타일 정의
-const formContainerStyle = {
-    padding: '16px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    maxWidth: '400px',
-    margin: 'auto',
-};
-
-const formGroupStyle = {
-    marginBottom: '16px',
-};
-
-const buttonStyle = {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-};
-
-const statusButtonStyle = {
-    padding: '10px 20px',
-    backgroundColor: '#6c757d',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-};
-
-const errorStyle = {
-    color: 'red',
-    marginBottom: '16px',
-};

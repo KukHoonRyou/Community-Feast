@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Container, Typography, TextField, Button, Paper, Box, Checkbox, FormControlLabel, CssBaseline, ThemeProvider, createTheme, List, ListItem, ListItemText, ListItemButton, Divider, Chip, Dialog, DialogTitle, DialogContent, DialogActions, IconButton
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+
+const theme = createTheme();
 
 const UserEatsManagePage = () => {
   const [eats, setEats] = useState([]);
+  const [foodTags, setFoodTags] = useState([]);
   const [selectedEat, setSelectedEat] = useState(null);
   const [formData, setFormData] = useState({
     eats_name: '',
@@ -12,7 +19,10 @@ const UserEatsManagePage = () => {
     allergic_ingredient: '',
     perishable: false,
     image_url: '',
+    food_tag_ids: [],
   });
+  const [newTag, setNewTag] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const userId = localStorage.getItem('userId'); // 사용자 ID를 로컬 스토리지에서 가져옵니다.
@@ -30,7 +40,18 @@ const UserEatsManagePage = () => {
       }
     };
 
+    const fetchFoodTags = async () => {
+      try {
+        const response = await fetch('/foodtags');
+        const data = await response.json();
+        setFoodTags(data);
+      } catch (error) {
+        console.error('Error fetching food tags:', error);
+      }
+    };
+
     fetchEats();
+    fetchFoodTags();
   }, [userId]);
 
   const handleSelectEat = (eat) => {
@@ -44,6 +65,7 @@ const UserEatsManagePage = () => {
       allergic_ingredient: eat.allergic_ingredient,
       perishable: eat.perishable,
       image_url: eat.image_url,
+      food_tag_ids: eat.food_tag_ids || [],
     });
   };
 
@@ -53,6 +75,48 @@ const UserEatsManagePage = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+  };
+
+  const handleTagClick = (tagId) => {
+    setFormData((prevFormData) => {
+      const tagExists = prevFormData.food_tag_ids.includes(tagId);
+      return {
+        ...prevFormData,
+        food_tag_ids: tagExists
+          ? prevFormData.food_tag_ids.filter(id => id !== tagId)
+          : [...prevFormData.food_tag_ids, tagId],
+      };
+    });
+  };
+
+  const handleNewTagChange = (e) => {
+    setNewTag(e.target.value);
+  };
+
+  const handleNewTagSubmit = async () => {
+    try {
+      const response = await fetch('/foodtags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ name: newTag }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFoodTags((prevTags) => [...prevTags, data]);
+        setDialogOpen(false);
+        setNewTag('');
+        setSuccess('New tag created successfully.');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to create new tag.');
+      }
+    } catch (error) {
+      setError('Error creating new tag.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -86,6 +150,10 @@ const UserEatsManagePage = () => {
 
   const handleDelete = async () => {
     if (!selectedEat) return;
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this eat?');
+    if (!confirmDelete) return;
+
     setError('');
     setSuccess('');
 
@@ -113,142 +181,165 @@ const UserEatsManagePage = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Manage Your Eats</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      
-      <h2>Your Eats</h2>
-      {eats.map(eat => (
-        <div key={eat.id} style={styles.eatItem} onClick={() => handleSelectEat(eat)}>
-          <h3>{eat.eats_name}</h3>
-          <p>{eat.description}</p>
-        </div>
-      ))}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container component="main" maxWidth="md">
+        <Typography component="h1" variant="h5" gutterBottom>
+          Manage Your Eats
+        </Typography>
+        {error && <Typography color="error">{error}</Typography>}
+        {success && <Typography color="success">{success}</Typography>}
 
-      {selectedEat && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <h2>Edit Eat: {selectedEat.eats_name}</h2>
-          <div>
-            <label htmlFor="eats_name">Eats Name:</label>
-            <input
+        <Typography component="h2" variant="h6" gutterBottom>
+          Your Eats
+        </Typography>
+        <List>
+          {eats.map((eat, index) => (
+            <React.Fragment key={eat.id}>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => handleSelectEat(eat)}>
+                  <ListItemText primary={eat.eats_name} secondary={eat.description} />
+                </ListItemButton>
+              </ListItem>
+              <Divider />
+            </React.Fragment>
+          ))}
+        </List>
+
+        {selectedEat && (
+          <Paper sx={{ padding: 2, marginTop: 3 }}>
+            <Typography component="h2" variant="h6" gutterBottom>
+              Edit Eat: {selectedEat.eats_name}
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Eats Name"
+                name="eats_name"
+                value={formData.eats_name}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                multiline
+                required
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Cook Time"
+                name="cook_time"
+                value={formData.cook_time}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Quantity"
+                name="quantity"
+                type="number"
+                value={formData.quantity}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Allergic Ingredient"
+                name="allergic_ingredient"
+                value={formData.allergic_ingredient}
+                onChange={handleChange}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.perishable}
+                    onChange={handleChange}
+                    name="perishable"
+                    color="primary"
+                  />
+                }
+                label="Perishable"
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Image URL"
+                name="image_url"
+                value={formData.image_url}
+                onChange={handleChange}
+              />
+              <Typography component="h3" variant="subtitle1" gutterBottom>
+                Food Tags
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {foodTags.map(tag => (
+                  <Chip
+                    key={tag.id}
+                    label={tag.name}
+                    clickable
+                    color={formData.food_tag_ids.includes(tag.id) ? 'primary' : 'default'}
+                    onClick={() => handleTagClick(tag.id)}
+                  />
+                ))}
+                <IconButton color="primary" onClick={() => setDialogOpen(true)}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Button type="submit" variant="contained" color="primary">
+                  Update Eat
+                </Button>
+                <Button variant="contained" color="error" onClick={handleDelete}>
+                  Delete Eat
+                </Button>
+              </Box>
+            </form>
+          </Paper>
+        )}
+
+        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+          <DialogTitle>Create New Tag</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="New Tag"
               type="text"
-              id="eats_name"
-              name="eats_name"
-              value={formData.eats_name}
-              onChange={handleChange}
-              required
+              fullWidth
+              value={newTag}
+              onChange={handleNewTagChange}
             />
-          </div>
-          <div>
-            <label htmlFor="category">Category:</label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="description">Description:</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="cook_time">Cook Time:</label>
-            <input
-              type="text"
-              id="cook_time"
-              name="cook_time"
-              value={formData.cook_time}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="quantity">Quantity:</label>
-            <input
-              type="number"
-              id="quantity"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="allergic_ingredient">Allergic Ingredient:</label>
-            <input
-              type="text"
-              id="allergic_ingredient"
-              name="allergic_ingredient"
-              value={formData.allergic_ingredient}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="perishable">Perishable:</label>
-            <input
-              type="checkbox"
-              id="perishable"
-              name="perishable"
-              checked={formData.perishable}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="image_url">Image URL:</label>
-            <input
-              type="text"
-              id="image_url"
-              name="image_url"
-              value={formData.image_url}
-              onChange={handleChange}
-            />
-          </div>
-          <button type="submit">Update Eat</button>
-          <button type="button" onClick={handleDelete} style={styles.deleteButton}>Delete Eat</button>
-        </form>
-      )}
-    </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDialogOpen(false)} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleNewTagSubmit} color="primary">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </ThemeProvider>
   );
-};
-
-const styles = {
-  eatItem: {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '16px',
-    margin: '8px',
-    width: '300px',
-    cursor: 'pointer',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  form: {
-    marginTop: '20px',
-    padding: '20px',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    width: '300px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    marginTop: '10px',
-    marginLeft: '10px',
-  }
 };
 
 export default UserEatsManagePage;

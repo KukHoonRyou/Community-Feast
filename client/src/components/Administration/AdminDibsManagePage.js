@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import {
+  Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Box
+} from '@mui/material';
 
 const AdminDibsManagePage = () => {
   const [dibs, setDibs] = useState([]);
@@ -12,19 +15,18 @@ const AdminDibsManagePage = () => {
   }, []);
 
   const handleDelete = id => {
-    fetch(`/dibs/${id}`, {
-      method: 'DELETE',
-    })
-      .then(response => {
-        if (response.ok) {
-          setDibs(dibs.filter(dib => dib.id !== id));
-        }
+    const confirmed = window.confirm('Are you sure you want to delete this dib?');
+    if (confirmed) {
+      fetch(`/dibs/${id}`, {
+        method: 'DELETE',
       })
-      .catch(error => console.error('Error deleting dib:', error));
-  };
-
-  const handleEdit = dib => {
-    setEditableDib(dib);
+        .then(response => {
+          if (response.ok) {
+            setDibs(dibs.filter(dib => dib.id !== id));
+          }
+        })
+        .catch(error => console.error('Error deleting dib:', error));
+    }
   };
 
   const handleChange = (e) => {
@@ -49,54 +51,62 @@ const AdminDibsManagePage = () => {
   };
 
   return (
-    <div>
-      <h1>Manage Dibs</h1>
+    <Container maxWidth="lg">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Manage Dibs
+      </Typography>
       {editableDib ? (
-        <div>
-          <h2>Editing Dib ID: {editableDib.id}</h2>
-          <label>
-            Status:
-            <input
-              type="checkbox"
+        <Paper sx={{ p: 3, mt: 3 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Editing Dib ID: {editableDib.id}
+          </Typography>
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography component="label">Status:</Typography>
+            <Checkbox
               name="dib_status"
               checked={editableDib.dib_status}
               onChange={(e) => handleChange({ target: { name: 'dib_status', value: e.target.checked } })}
             />
-          </label>
-          <button onClick={handleUpdate}>Update</button>
-        </div>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button variant="contained" color="primary" onClick={handleUpdate}>
+                Update
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Updated At</th>
-              <th>User ID</th>
-              <th>Eats ID</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dibs.map(dib => (
-              <tr key={dib.id}>
-                <td>{dib.id}</td>
-                <td>{dib.dib_status ? 'Active' : 'Inactive'}</td>
-                <td>{new Date(dib.created_at).toLocaleString()}</td>
-                <td>{new Date(dib.updated_at).toLocaleString()}</td>
-                <td>{dib.user_id}</td>
-                <td>{dib.eats_id}</td>
-                <td>
-                  <button onClick={() => handleEdit(dib)}>Edit</button>
-                  <button onClick={() => handleDelete(dib.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper} sx={{ mt: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Created At</TableCell>
+                <TableCell>Updated At</TableCell>
+                <TableCell>User ID</TableCell>
+                <TableCell>Eats ID</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {dibs.map(dib => (
+                <TableRow key={dib.id}>
+                  <TableCell>{dib.id}</TableCell>
+                  <TableCell>{dib.dib_status ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>{new Date(dib.created_at).toLocaleString()}</TableCell>
+                  <TableCell>{new Date(dib.updated_at).toLocaleString()}</TableCell>
+                  <TableCell>{dib.user_id}</TableCell>
+                  <TableCell>{dib.eats_id}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="error" onClick={() => handleDelete(dib.id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Container>
   );
 };
 

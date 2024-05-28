@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Paper, Typography, Grid, Box, Avatar, CircularProgress, Container, Alert } from '@mui/material';
 
 const FoodTagsDetailPage = () => {
     const { id } = useParams();
@@ -11,93 +12,75 @@ const FoodTagsDetailPage = () => {
         // Fetch the food tag details
         fetch(`/foodtags/${id}`)
             .then(response => {
-                console.log('Fetching food tag details', response);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Food tag details:', data);
                 setFoodTag(data);
             })
             .catch(error => {
-                console.error('Error fetching food tag details:', error);
                 setError(error.toString());
             });
 
         // Fetch the eats related to this food tag
         fetch(`/foodtags/${id}/eats`)
             .then(response => {
-                console.log('Fetching eats related to food tag', response);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Eats related to food tag:', data);
                 setEats(data);
             })
             .catch(error => {
-                console.error('Error fetching eats related to food tag:', error);
                 setError(error.toString());
             });
     }, [id]);
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <Container><Alert severity="error">{error}</Alert></Container>;
     }
 
     if (!foodTag) {
-        return <div>Loading...</div>;
+        return <Container><CircularProgress /></Container>;
     }
 
     return (
-        <div style={detailContainerStyle}>
-            <h2>{foodTag.name}</h2>
-            <h3>Related Eats</h3>
-            <div style={eatsContainerStyle}>
+        <Container sx={{ py: 4 }}>
+            <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                <Typography variant="h4" component="h2">{foodTag.name}</Typography>
+            </Paper>
+            <Typography variant="h5" component="h3" gutterBottom>Related Eats</Typography>
+            <Grid container spacing={2}>
                 {eats.map(eat => (
-                    <Link to={`/eats/${eat.id}`} key={eat.id} style={linkStyle}>
-                        <div style={eatCardStyle}>
-                            <h4>{eat.eats_name}</h4>
-                            <p>{eat.description}</p>
-                        </div>
-                    </Link>
+                    <Grid item xs={12} sm={6} md={4} key={eat.id}>
+                        <Link to={`/eats/${eat.id}`} style={linkStyle}>
+                            <Paper elevation={3} sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                    <Avatar alt={eat.eats_name} src={eat.image} sx={{ width: 56, height: 56, mr: 2 }} />
+                                    <Typography variant="h6" component="div">{eat.eats_name}</Typography>
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    {eat.description}
+                                </Typography>
+                                <Typography variant="body2" color="primary">
+                                    {foodTag.name}
+                                </Typography>
+                            </Paper>
+                        </Link>
+                    </Grid>
                 ))}
-            </div>
-        </div>
+            </Grid>
+        </Container>
     );
 };
 
 export default FoodTagsDetailPage;
 
 // 인라인 스타일 정의
-const detailContainerStyle = {
-    padding: '16px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-};
-
-const eatsContainerStyle = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '16px',
-    marginTop: '16px',
-};
-
-const eatCardStyle = {
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    padding: '16px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    flex: '1 1 calc(33% - 32px)',
-    boxSizing: 'border-box',
-    maxWidth: 'calc(33% - 32px)',
-};
-
 const linkStyle = {
     textDecoration: 'none',
     color: 'inherit'

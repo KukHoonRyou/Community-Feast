@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createTheme, ThemeProvider, CssBaseline, Container, Typography, TextField, Button, Box, Paper } from '@mui/material';
+import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
 
 const SignupPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -8,7 +16,6 @@ const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -26,8 +33,7 @@ const SignupPage = () => {
         lastName,
         username,
         email,
-        password,
-        isAdmin
+        password
       }),
     });
     if (response.ok) {
@@ -47,86 +53,109 @@ const SignupPage = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Sign Up</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="firstName">First Name:</label>
-          <input
-            type="text"
-            id="firstName"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="lastName">Last Name:</label>
-          <input
-            type="text"
-            id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="username">User Name:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="email">Email Address:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="isAdmin">Create as Admin:</label>
-          <input
-            type="checkbox"
-            id="isAdmin"
-            checked={isAdmin}
-            onChange={(e) => setIsAdmin(e.target.checked)}
-          />
-        </div>
-        <button type="submit">Sign Up</button>
-      </form>
-      <p>
-        Registered?{' '}
-        <button onClick={handleLoginRedirect}>Log In</button>
-      </p>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container component="main" maxWidth="xs">
+        <Paper elevation={3} sx={{ padding: 3, mt: 4 }}>
+          <Typography component="h1" variant="h5" align="center">
+            Sign Up
+          </Typography>
+          {error && <Typography color="error" align="center" sx={{ mt: 1 }}>{error}</Typography>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="firstName"
+              label="First Name"
+              name="firstName"
+              autoComplete="given-name"
+              autoFocus
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="lastName"
+              label="Last Name"
+              name="lastName"
+              autoComplete="family-name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="User Name"
+              name="username"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign Up
+            </Button>
+            <Typography align="center">
+              Registered?{' '}
+              <Button onClick={handleLoginRedirect} color="primary">
+                Log In
+              </Button>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 

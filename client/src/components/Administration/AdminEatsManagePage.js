@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import {
+  Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Checkbox, Box, Dialog, DialogTitle, DialogContent, DialogActions, FormControlLabel
+} from '@mui/material';
 
 const AdminEatsManagePage = () => {
   const [eats, setEats] = useState([]);
   const [editableEat, setEditableEat] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState({ title: '', content: '' });
 
   useEffect(() => {
     fetch('/eats')
@@ -12,15 +17,18 @@ const AdminEatsManagePage = () => {
   }, []);
 
   const handleDelete = id => {
-    fetch(`/eats/${id}`, {
-      method: 'DELETE',
-    })
-      .then(response => {
-        if (response.ok) {
-          setEats(eats.filter(eat => eat.id !== id));
-        }
+    const confirmed = window.confirm('Are you sure you want to delete this eat?');
+    if (confirmed) {
+      fetch(`/eats/${id}`, {
+        method: 'DELETE',
       })
-      .catch(error => console.error('Error deleting eat:', error));
+        .then(response => {
+          if (response.ok) {
+            setEats(eats.filter(eat => eat.id !== id));
+          }
+        })
+        .catch(error => console.error('Error deleting eat:', error));
+    }
   };
 
   const handleEdit = eat => {
@@ -66,101 +74,164 @@ const AdminEatsManagePage = () => {
       .catch(error => console.error('Error updating eat:', error));
   };
 
+  const handleDialogOpen = (title, content) => {
+    setDialogContent({ title, content });
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setDialogContent({ title: '', content: '' });
+  };
+
   return (
-    <div>
-      <h1>Manage Eats</h1>
+    <Container maxWidth="lg">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Manage Eats
+      </Typography>
       {editableEat ? (
-        <div>
-          <h2>Editing Eat: {editableEat.eats_name}</h2>
-          <label>
-            Name:
-            <input type="text" name="eats_name" value={editableEat.eats_name} onChange={handleChange} />
-          </label>
-          <label>
-            Category:
-            <input type="text" name="category" value={editableEat.category} onChange={handleChange} />
-          </label>
-          <label>
-            Description:
-            <input type="text" name="description" value={editableEat.description} onChange={handleChange} />
-          </label>
-          <label>
-            Quantity:
-            <input type="number" name="quantity" value={editableEat.quantity} onChange={handleChange} />
-          </label>
-          <label>
-            Allergic Ingredient:
-            <input type="text" name="allergic_ingredient" value={editableEat.allergic_ingredient} onChange={handleChange} />
-          </label>
-          <label>
-            Cook Time:
-            <input type="text" name="cook_time" value={editableEat.cook_time} onChange={handleChange} />
-          </label>
-          <label>
-            Image URL:
-            <input type="text" name="image_url" value={editableEat.image_url} onChange={handleChange} />
-          </label>
-          <label>
-            Perishable:
-            <input
-              type="checkbox"
-              name="perishable"
-              checked={editableEat.perishable}
-              onChange={(e) => handleChange({ target: { name: 'perishable', value: e.target.checked } })}
+        <Paper sx={{ p: 3, mt: 3 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Editing Eat: {editableEat.eats_name}
+          </Typography>
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Name"
+              name="eats_name"
+              value={editableEat.eats_name}
+              onChange={handleChange}
+              fullWidth
+              required
             />
-          </label>
-          <label>
-            Is Available:
-            <button onClick={() => handleToggleAvailable(editableEat.id)}>
-              {editableEat.is_available ? 'Yes' : 'No'}
-            </button>
-          </label>
-          <button onClick={handleUpdate}>Update</button>
-        </div>
+            <TextField
+              label="Category"
+              name="category"
+              value={editableEat.category}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Description"
+              name="description"
+              value={editableEat.description}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Quantity"
+              name="quantity"
+              type="number"
+              value={editableEat.quantity}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Allergic Ingredient"
+              name="allergic_ingredient"
+              value={editableEat.allergic_ingredient}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Cook Time"
+              name="cook_time"
+              value={editableEat.cook_time}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Image URL"
+              name="image_url"
+              value={editableEat.image_url}
+              onChange={handleChange}
+              fullWidth
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editableEat.perishable}
+                  onChange={(e) => handleChange({ target: { name: 'perishable', value: e.target.checked } })}
+                  name="perishable"
+                />
+              }
+              label="Perishable"
+            />
+            <Button variant="contained" color="primary" onClick={handleUpdate}>
+              Update
+            </Button>
+          </Box>
+        </Paper>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Quantity</th>
-              <th>Allergic Ingredient</th>
-              <th>Cook Time</th>
-              <th>Image URL</th>
-              <th>Perishable</th>
-              <th>Is Available</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {eats.map(eat => (
-              <tr key={eat.id}>
-                <td>{eat.id}</td>
-                <td>{eat.eats_name}</td>
-                <td>{eat.category}</td>
-                <td>{eat.description}</td>
-                <td>{eat.quantity}</td>
-                <td>{eat.allergic_ingredient}</td>
-                <td>{eat.cook_time}</td>
-                <td>{eat.image_url}</td>
-                <td>{eat.perishable ? 'Yes' : 'No'}</td>
-                <td>
-                  <button onClick={() => handleToggleAvailable(eat.id)}>
-                    {eat.is_available ? 'Yes' : 'No'}
-                  </button>
-                </td>
-                <td>
-                  <button onClick={() => handleEdit(eat)}>Edit</button>
-                  <button onClick={() => handleDelete(eat.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper} sx={{ mt: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Category</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Quantity</TableCell>
+                <TableCell>Allergic Ingredient</TableCell>
+                <TableCell>Cook Time</TableCell>
+                <TableCell>Image URL</TableCell>
+                <TableCell>Perishable</TableCell>
+                <TableCell>Is Available</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {eats.map(eat => (
+                <TableRow key={eat.id}>
+                  <TableCell>{eat.id}</TableCell>
+                  <TableCell>{eat.eats_name}</TableCell>
+                  <TableCell>{eat.category}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" onClick={() => handleDialogOpen('Description', eat.description)}>
+                      View
+                    </Button>
+                  </TableCell>
+                  <TableCell>{eat.quantity}</TableCell>
+                  <TableCell>{eat.allergic_ingredient}</TableCell>
+                  <TableCell>{eat.cook_time}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" onClick={() => handleDialogOpen('Image URL', eat.image_url)}>
+                      View
+                    </Button>
+                  </TableCell>
+                  <TableCell>{eat.perishable ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" onClick={() => handleToggleAvailable(eat.id)}>
+                      {eat.is_available ? 'Yes' : 'No'}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button variant="contained" color="info" onClick={() => handleEdit(eat)}>Edit</Button>
+                      <Button variant="contained" color="error" onClick={() => handleDelete(eat.id)}>Delete</Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>{dialogContent.title}</DialogTitle>
+        <DialogContent>
+          <Typography>{dialogContent.content}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 
