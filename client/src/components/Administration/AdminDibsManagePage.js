@@ -20,8 +20,12 @@ const AdminDibsManagePage = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/dibs/${id}`, { method: 'DELETE' });
-      setDibs(dibs.filter((dib) => dib.id !== id));
+      const response = await fetch(`/dibs/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        setDibs(dibs.filter((dib) => dib.id !== id));
+      } else {
+        console.error('Error deleting dib:', await response.json());
+      }
     } catch (error) {
       console.error('Error deleting dib:', error);
     }

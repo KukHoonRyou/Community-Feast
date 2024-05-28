@@ -25,7 +25,7 @@ class User(db.Model, SerializerMixin):
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     first_name = db.Column(db.String(50), nullable=True)
     last_name = db.Column(db.String(50), nullable=True)
@@ -211,6 +211,7 @@ class Dibs(db.Model, SerializerMixin):
             'eats_id': self.eats_id,
             'user_names': self.user.username if self.user else None,
             'eats_name': self.eats.eats_name if self.eats else None,
+            'eats_image_url': self.eats.image_url if self.eats else None,
             'eats_user_phone': self.eats.user.phone_number if self.eats and self.eats.user else None,
             'eats_user_address': self.eats.user.address if self.eats and self.eats.user else None
         }

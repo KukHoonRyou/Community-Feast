@@ -46,7 +46,11 @@ def get_current_user():
         email_address=user.email_address,
         first_name=user.first_name,
         last_name=user.last_name,
-        isAdmin=user.isAdmin
+        phone_number=user.phone_number,  # 추가
+        address=user.address,  # 추가
+        allergic_info=user.allergic_info,  # 추가
+        isAdmin=user.isAdmin,
+        created_at=user.created_at.isoformat()
     ), 200
 
 @app.route('/api/login', methods=['POST'])
@@ -229,13 +233,12 @@ def delete_eat(id):
 
 @app.route('/dibs', methods=['GET'])
 @login_required
-def get_dibs():
-    try:
+def get_user_dibs():
+    if current_user.isAdmin:
         dibs = Dibs.query.all()
-        dibs_data = [dib.to_dict() for dib in dibs]
-        return jsonify(dibs_data), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 500
+    else:
+        dibs = Dibs.query.filter_by(user_id=current_user.id).all()
+    return jsonify([dib.to_dict() for dib in dibs])
 
 @app.route('/dibs/<int:id>', methods=['GET'])
 @login_required
@@ -250,9 +253,7 @@ def get_dib(id):
             dib_data = dib.to_dict()
             return jsonify(dib_data), 200
     except Exception as e:
-        app.logger.error(f"Error fetching dib: {e}")
         return jsonify(error=str(e)), 500
-
 
 @app.route('/dibs', methods=['POST'])
 @login_required
