@@ -15,19 +15,43 @@ const linkStyle = {
   color: 'inherit',
 };
 
+// 문자열을 해시 값으로 변환하는 함수
+const stringToHash = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+// 해시 값을 파스텔 색상으로 변환하는 함수
+const hashToPastelColor = (hash) => {
+  const r = (hash & 0xFF0000) >> 16;
+  const g = (hash & 0x00FF00) >> 8;
+  const b = hash & 0x0000FF;
+  return `rgb(${(r + 255) / 2}, ${(g + 255) / 2}, ${(b + 255) / 2})`;
+};
+
 // 카드 컴포넌트 생성
 const FoodTagCard = ({ tag }) => {
+  const hash = stringToHash(tag.name.toLowerCase());
+  const bgColor = hashToPastelColor(hash);
+
   return (
     <Link to={`/foodtags/${tag.id}`} style={linkStyle}>
-      <Paper 
-        elevation={3} 
+      <Paper
+        elevation={3}
         sx={{
           padding: 2,
+          backgroundColor: bgColor,
           transition: '0.3s',
-          '&:hover': { boxShadow: 6 }
+          '&:hover': { boxShadow: 6 },
+          textAlign: 'center', // 텍스트 가운데 정렬
         }}
       >
-        <Typography variant="h6" component="div">
+        <Typography variant="h6" component="div" sx={{ color: '#D2691E' /* 입맛을 돋구는 색상 */ }}>
           {tag.name}
         </Typography>
         <Typography variant="body2" color="text.secondary">
