@@ -6,6 +6,76 @@
 
 CommunityFeast is an innovative food sharing platform that aims to reduce food waste and strengthen connections within local communities. 
 
+## Prerequisites
+
+Check the requirements before you run the app:
+
+- You have installed [Git](https://git-scm.com/).
+- You have a [GitHub](https://github.com/) account.
+- You have installed [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/get-npm).
+- You have installed [Python](https://www.python.org/) and [pipenv](https://pipenv.pypa.io/en/latest/).
+- You have installed [Honcho](https://honcho.readthedocs.io/en/latest/) (to manage Procfile-based applications).
+
+## Getting Started
+
+Follow these steps.
+
+### Setting up front-end
+
+1. Clone the repository:
+
+   ```bash
+   git clone git@github.com:your-username/Community-Feast.git
+   ```
+
+2. Navigate to the client (front-end directory):
+
+   ```bash
+   cd client
+   ```
+
+3. Install npm packages:
+
+   ```bash
+   npm install
+   ```
+
+### Setting up back-end
+
+1. Go to the root directory of the project.
+
+2. Install pipenv and dependencies:
+
+   ```bash
+   pipenv install
+   ```
+
+3. Run the virtual environment:
+
+   ```bash
+   pipenv shell
+   ```
+
+### Db file Setup
+
+1. Go to the data directory (in this case, instance folder):
+
+   ```bash
+   cd server/instance
+   ```
+
+2. Create a app.db file:
+
+   ```bash
+   touch app.db
+   ```
+
+3. Move data from the SQL file to db file:
+
+   ```bash
+   sqlite3 app.db < app.sql
+   ```
+
 ## Wireframe
 
 ### Pages
