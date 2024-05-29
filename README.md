@@ -6,7 +6,7 @@
 
 CommunityFeast is an innovative food sharing platform that aims to reduce food waste and strengthen connections within local communities. 
 
-## Prerequisites
+## Requirements before running the app
 
 Check the requirements before you run the app:
 
