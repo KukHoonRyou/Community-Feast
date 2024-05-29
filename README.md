@@ -35,7 +35,7 @@ CommunityFeast is an innovative food sharing platform that aims to reduce food w
 
 - All users should have an unique usernames
 - A user can make only one dib within a specific period of time to prevent food waste and not interfere with others' chances to get food.
-- Admin user should only be allowed to edit user info, Eats, and Dibs status
+- Admin user should only be allowed to edit all users info, Eats, and Dibs status
 
 
 ## Validations
