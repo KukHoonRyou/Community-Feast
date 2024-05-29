@@ -3,6 +3,7 @@ import {
   Container, Typography, TextField, Button, Paper, Box, Checkbox, FormControlLabel, CssBaseline, ThemeProvider, createTheme, List, ListItem, ListItemText, ListItemButton, Divider, Chip, Dialog, DialogTitle, DialogContent, DialogActions, IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import Footer from '../../Footer'; // Footer 컴포넌트를 불러옵니다.
 
 const theme = createTheme();
 
@@ -65,7 +66,7 @@ const UserEatsManagePage = () => {
       allergic_ingredient: eat.allergic_ingredient,
       perishable: eat.perishable,
       image_url: eat.image_url,
-      food_tag_ids: eat.food_tag_ids || [],
+      food_tag_ids: eat.food_tags.map(tag => tag.id) || [], // food_tags 배열에서 id 추출
     });
   };
 
@@ -183,7 +184,7 @@ const UserEatsManagePage = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container component="main" maxWidth="md">
+      <Container component="main" maxWidth="md" sx={{ mb: '64px' }}> {/* 푸터의 높이만큼 하단 여백을 추가합니다. */}
         <Typography component="h1" variant="h5" gutterBottom>
           Manage Your Eats
         </Typography>
@@ -338,6 +339,7 @@ const UserEatsManagePage = () => {
           </DialogActions>
         </Dialog>
       </Container>
+      <Footer />
     </ThemeProvider>
   );
 };

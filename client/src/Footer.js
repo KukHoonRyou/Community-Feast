@@ -20,7 +20,8 @@ const Footer = () => {
           mt: 4, 
           position: 'fixed', 
           bottom: 0, 
-          width: '100%' 
+          width: '100%', 
+          height: '40px' // 푸터의 높이를 지정합니다.
         }}
       >
         <Container maxWidth="lg">

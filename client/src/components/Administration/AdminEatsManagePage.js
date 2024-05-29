@@ -53,20 +53,20 @@ const AdminEatsManagePage = () => {
   }, []);
 
   const handleSelectEat = (eat) => {
-    setSelectedEat(eat);
-    setFormData({
-      eats_name: eat.eats_name,
-      category: eat.category,
-      description: eat.description,
-      cook_time: eat.cook_time,
-      quantity: eat.quantity,
-      allergic_ingredient: eat.allergic_ingredient,
-      perishable: eat.perishable,
-      image_url: eat.image_url,
-      food_tag_ids: eat.food_tag_ids || [],
-    });
-    setEditDialogOpen(true);
-  };
+  setSelectedEat(eat);
+  setFormData({
+    eats_name: eat.eats_name,
+    category: eat.category,
+    description: eat.description,
+    cook_time: eat.cook_time,
+    quantity: eat.quantity,
+    allergic_ingredient: eat.allergic_ingredient,
+    perishable: eat.perishable,
+    image_url: eat.image_url,
+    food_tag_ids: eat.food_tags.map(tag => tag.id) || [], // food_tags 배열에서 id 추출
+  });
+  setEditDialogOpen(true);
+};
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -311,9 +311,7 @@ const AdminEatsManagePage = () => {
             <Button onClick={handleDelete} variant="contained" color="error">
               Delete Eat
             </Button>
-            <Button onClick={() => setEditDialogOpen(false)} color="secondary">
-              Cancel
-            </Button>
+            
           </DialogActions>
         </Dialog>
 

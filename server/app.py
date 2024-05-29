@@ -206,12 +206,12 @@ def update_eat(id):
 
         # 다른 필드를 업데이트
         for key, value in data.items():
-            if key != 'is_available' and key != 'food_tags':
+            if key != 'is_available' and key != 'food_tag_ids':
                 setattr(eat, key, value)
 
-        # food_tags 필드가 있는 경우 별도로 처리
-        if 'food_tags' in data:
-            eat.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tags']]
+        # food_tag_ids 필드가 있는 경우 별도로 처리
+        if 'food_tag_ids' in data:
+            eat.food_tags = [FoodTag.query.get(tag_id) for tag_id in data['food_tag_ids']]
 
         db.session.commit()
         return jsonify(eat.to_dict()), 200

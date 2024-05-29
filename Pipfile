@@ -14,65 +14,56 @@ flask-restful = "*"
 flask-cors = "*"
 faker = "*"
 
-alembic==1.13.1
-aniso8601==9.0.1
-appnope==0.1.4
-asttokens==2.4.1
-backcall==0.2.0
-bidict==0.23.1
-click==8.1.7
-decorator==5.1.1
-dnspython==2.6.1
-eventlet==0.36.1
-executing==2.0.1
-
-
-
-Flask-Login==0.6.3
-flask-marshmallow==1.2.1
-
-
-Flask-SocketIO==5.3.6
-
-greenlet==3.0.3
-gunicorn==22.0.0
-h11==0.14.0
-honcho==1.1.0
-importlib_metadata==7.1.0
-importlib_resources==6.4.0
-
-ipython==8.12.3
-itsdangerous==2.2.0
-jedi==0.19.1
-Jinja2==3.1.4
-Mako==1.3.5
-MarkupSafe==2.1.5
-marshmallow==3.21.2
-matplotlib-inline==0.1.7
-packaging==24.0
-parso==0.8.4
-pexpect==4.9.0
-pickleshare==0.7.5
-prompt-toolkit==3.0.43
-ptyprocess==0.7.0
-pure-eval==0.2.2
-Pygments==2.18.0
-python-dateutil==2.9.0.post0
-python-engineio==4.9.1
-python-socketio==5.11.2
-pytz==2024.1
-simple-websocket==1.0.0
-six==1.16.0
-SQLAlchemy==2.0.30
-SQLAlchemy-serializer==1.4.12
-stack-data==0.6.3
-toml==0.10.2
-traitlets==5.14.3
-typing_extensions==4.11.0
-wcwidth==0.2.13
-
-wsproto==1.2.0
-zipp==3.18.1
+alembic = '1.13.1'
+aniso8601 = '9.0.1'
+appnope = '0.1.4'
+asttokens = '2.4.1'
+backcall = '0.2.0'
+bidict = '0.23.1'
+click = '8.1.7'
+decorator = '5.1.1'
+dnspython = '2.6.1'
+eventlet = '0.36.1'
+executing = '2.0.1'
+Flask-Login = '0.6.3'
+flask-marshmallow = '1.2.1'
+Flask-SocketIO = '5.3.6'
+greenlet = '3.0.3'
+gunicorn = '22.0.0'
+h11 = '0.14.0'
+honcho = '1.1.0'
+importlib_metadata = '7.1.0'
+importlib_resources = '6.4.0'
+ipython = '8.12.3'
+itsdangerous = '2.2.0'
+jedi = '0.19.1'
+Jinja2 = '3.1.4'
+Mako = '1.3.5'
+MarkupSafe = '2.1.5'
+marshmallow = '3.21.2'
+matplotlib-inline = '0.1.7'
+packaging = '24.0'
+parso = '0.8.4'
+pexpect = '4.9.0'
+pickleshare = '0.7.5'
+prompt-toolkit = '3.0.43'
+ptyprocess = '0.7.0'
+pure-eval = '0.2.2'
+Pygments = '2.18.0'
+python-dateutil = '2.9.0.post0'
+python-engineio = '4.9.1'
+python-socketio = '5.11.2'
+pytz = '2024.1'
+simple-websocket = '1.0.0'
+six = '1.16.0'
+SQLAlchemy = '2.0.30'
+stack-data = '0.6.3'
+toml = '0.10.2'
+traitlets = '5.14.3'
+typing_extensions = '4.11.0'
+wcwidth = '0.2.13'
+wsproto = '1.2.0'
+zipp = '3.18.1'
 
 [requires]
 python_full_version = "3.8.13"
