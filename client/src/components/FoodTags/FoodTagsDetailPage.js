@@ -60,7 +60,7 @@ const FoodTagsDetailPage = () => {
                         <Link to={`/eats/${eat.id}`} style={linkStyle}>
                             <Paper elevation={3} sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <Avatar alt={eat.eats_name} src={eat.image} sx={{ width: 56, height: 56, mr: 2 }} />
+                                    <Avatar alt={eat.eats_name} src={eat.image_url} sx={{ width: 56, height: 56, mr: 2 }} />
                                     <Typography variant="h6" component="div">{eat.eats_name}</Typography>
                                 </Box>
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

@@ -76,6 +76,16 @@ Follow these steps.
    sqlite3 app.db < app.sql
    ```
 
+## Running the App
+
+1. Go to the root directory of the project.
+
+2. Start the application using Honcho:
+
+   ```bash
+   honcho start -f Procfile.dev
+   ```
+
 ## Wireframe
 
 ### Pages
