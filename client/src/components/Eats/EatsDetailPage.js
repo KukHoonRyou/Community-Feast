@@ -118,25 +118,25 @@ const EatsDetailPage = () => {
                     <Box sx={{ flexGrow: 1, mb: 2 }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6} md={4}>
-                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'red' }}>
-                                        Allergic Info: <Typography component="span" sx={{ fontSize: '1.25rem', color: 'red', fontWeight: 'bold' }}>{eat.allergic_info || 'None'}</Typography>
-                                    </Typography>
-                                </Paper>
+                            <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'red' }}>
+                                Allergic Info: <Typography component="span" sx={{ fontSize: '1.25rem', color: 'red', fontWeight: 'bold' }}>{eat.allergic_ingredient || 'None'}</Typography>
+                                </Typography>
+                            </Paper>
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                        Cook Time: <Typography component="span">{eat.cook_time || 'Unknown'}</Typography>
-                                    </Typography>
-                                </Paper>
+                            <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                Cook Time: <Typography component="span">{eat.cook_time || 'Unknown'}</Typography>
+                                </Typography>
+                            </Paper>
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                        Quantity: <Typography component="span">{eat.quantity || 'Unknown'}</Typography>
-                                    </Typography>
-                                </Paper>
+                            <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                Quantity: <Typography component="span">{eat.quantity || 'Unknown'}</Typography>
+                                </Typography>
+                            </Paper>
                             </Grid>
                         </Grid>
                     </Box>
