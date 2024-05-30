@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MyDibsPage from '../../pages/MyDibsPage';
-import { Container, Box, Typography, Button, Chip, CircularProgress, Paper, CardMedia, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { Container, Box, Typography, Button, Chip, CircularProgress, Grid, Paper, CardMedia, CssBaseline, ThemeProvider, createTheme, Divider, Card, CardContent } from '@mui/material';
 import '@fontsource/roboto'; // Roboto 폰트를 불러옵니다.
 
 const theme = createTheme({
@@ -76,9 +76,16 @@ const EatsDetailPage = () => {
             <Container>
                 <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="h4" component="h2" gutterBottom>
-                            {eat.eats_name}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="h4" component="h2" gutterBottom>
+                                {eat.eats_name}
+                            </Typography>
+                            <Box sx={{ ml: 2 }}>
+                                {eat.tags && eat.tags.map((tag, index) => (
+                                    <Chip key={index} label={tag} sx={{ ml: 1 }} />
+                                ))}
+                            </Box>
+                        </Box>
                         <Button
                             variant="contained"
                             sx={{
@@ -94,6 +101,10 @@ const EatsDetailPage = () => {
                             {eat.is_available ? 'Open' : 'Closed'}
                         </Button>
                     </Box>
+                    <Divider sx={{ mt: 2, mb: 2 }} />
+                    <Typography variant="body1" paragraph>
+                        {eat.description}
+                    </Typography>
                     {eat.image_url && (
                         <CardMedia
                             component="img"
@@ -103,18 +114,33 @@ const EatsDetailPage = () => {
                             sx={{ mb: 2 }}
                         />
                     )}
-                    <Typography variant="body1" paragraph>
-                        {eat.description}
-                    </Typography>
-                    <Box mb={2}>
-                        <Typography variant="subtitle1" component="span" sx={{ fontWeight: 'bold' }}>
-                            Food Tags: 
-                        </Typography>
-                        {eat.tags && eat.tags.map((tag, index) => (
-                            <Chip key={index} label={tag} sx={{ ml: 1, mt: 1 }} />
-                        ))}
+                    
+                    <Box sx={{ flexGrow: 1, mb: 2 }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'red' }}>
+                                        Allergic Info: <Typography component="span" sx={{ fontSize: '1.25rem', color: 'red', fontWeight: 'bold' }}>{eat.allergic_info || 'None'}</Typography>
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                        Cook Time: <Typography component="span">{eat.cook_time || 'Unknown'}</Typography>
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                        Quantity: <Typography component="span">{eat.quantity || 'Unknown'}</Typography>
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </Box>
-                    <Box mb={2}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                         {eat.is_available && !userHasDibs && eat.user_id !== parseInt(userId) && (
                             <Button
                                 onClick={handleDibsClick}
@@ -132,17 +158,19 @@ const EatsDetailPage = () => {
                             </Button>
                         )}
                     </Box>
-                    {eat.user_id === parseInt(userId) ? (
-                        <Typography color="primary" fontWeight="bold">Thanks for sharing!</Typography>
-                    ) : (
-                        eat.is_available ? (
-                            userHasDibs ? (
-                                <Typography color="secondary" fontWeight="bold">There is already an ongoing dibs, so you cannot create another one.</Typography>
-                            ) : null
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {eat.user_id === parseInt(userId) ? (
+                            <Typography color="primary" fontWeight="bold">Thanks for sharing!</Typography>
                         ) : (
-                            <Typography color="secondary" fontWeight="bold">Someone else already called dibs!!</Typography>
-                        )
-                    )}
+                            eat.is_available ? (
+                                userHasDibs ? (
+                                    <Typography color="secondary" fontWeight="bold">There is already an ongoing dibs, so you cannot create another one.</Typography>
+                                ) : null
+                            ) : (
+                                <Typography color="secondary" fontWeight="bold">Someone else already called dibs!!</Typography>
+                            )
+                        )}
+                    </Box>
                     <MyDibsPage onDibsFetch={handleDibsFetch} />
                 </Paper>
             </Container>

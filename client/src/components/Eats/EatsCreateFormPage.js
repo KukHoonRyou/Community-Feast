@@ -27,7 +27,10 @@ const EatsCreateFormPage = () => {
     eats_name: '',
     category: '',
     description: '',
-    cook_time: '',
+    cook_time_year: new Date().getFullYear(),
+    cook_time_month: ('0' + (new Date().getMonth() + 1)).slice(-2),
+    cook_time_day: ('0' + new Date().getDate()).slice(-2),
+    cook_time_hour: '',
     quantity: 0,
     allergic_ingredient: '',
     perishable: false,
@@ -80,7 +83,10 @@ const EatsCreateFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting form data:', formData);
+    const { cook_time_year, cook_time_month, cook_time_day, cook_time_hour, ...rest } = formData;
+    const cook_time = `${cook_time_year}-${cook_time_month}-${cook_time_day} ${cook_time_hour}:00:00`;
+
+    console.log('Submitting form data:', { ...rest, cook_time });
 
     try {
       const response = await fetch('/eats', {
@@ -88,7 +94,7 @@ const EatsCreateFormPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, user_id: userId }),
+        body: JSON.stringify({ ...rest, cook_time, user_id: userId }),
       });
 
       if (!response.ok) {
@@ -173,17 +179,53 @@ const EatsCreateFormPage = () => {
               value={formData.description}
               onChange={handleChange}
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="cook_time"
-              label="Cook Time"
-              name="cook_time"
-              autoComplete="cook_time"
-              value={formData.cook_time}
-              onChange={handleChange}
-            />
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                id="cook_time_year"
+                label="Year"
+                name="cook_time_year"
+                type="number"
+                value={formData.cook_time_year}
+                onChange={handleChange}
+                sx={{ width: '25%' }}
+              />
+              <TextField
+                margin="normal"
+                required
+                id="cook_time_month"
+                label="Month"
+                name="cook_time_month"
+                type="number"
+                value={formData.cook_time_month}
+                onChange={handleChange}
+                sx={{ width: '25%' }}
+              />
+              <TextField
+                margin="normal"
+                required
+                id="cook_time_day"
+                label="Day"
+                name="cook_time_day"
+                type="number"
+                value={formData.cook_time_day}
+                onChange={handleChange}
+                sx={{ width: '25%' }}
+              />
+              <TextField
+                margin="normal"
+                required
+                id="cook_time_hour"
+                label="Hour (24h)"
+                name="cook_time_hour"
+                type="number"
+                placeholder="00-23"
+                value={formData.cook_time_hour}
+                onChange={handleChange}
+                sx={{ width: '25%' }}
+              />
+            </Box>
             <TextField
               margin="normal"
               required
